@@ -1,0 +1,10 @@
+openapi: 3.0.3
+components:
+  parameters:
+    CourseId:
+      name: courseId
+      in: path
+      description: The course's ID.
+      required: true
+      schema:
+        type: string

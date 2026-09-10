@@ -30,3 +30,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### OPEN API ###
+open-api/node_modules

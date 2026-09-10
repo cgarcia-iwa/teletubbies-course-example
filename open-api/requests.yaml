@@ -1,0 +1,68 @@
+openapi: 3.0.3
+components:
+  schemas:
+    NewCourseRequest:
+      type: object
+      description: |
+        Payload used to create a new course.
+      required:
+        - name
+        - duration
+        - level
+        - category
+      properties:
+        name:
+          type: string
+          description: Name of the course.
+          example: Introduction to Spring Boot
+          maxLength: 200
+          minLength: 1
+          x-field-extra-annotation: "@NotBlank"
+        description:
+          type: string
+          description: Detailed description of the course content.
+          example: Learn the fundamentals of building REST APIs with Spring Boot.
+          maxLength: 1000
+        duration:
+          type: integer
+          format: int32
+          description: Total duration of the course, in hours.
+          example: 12
+          minimum: 1
+        level:
+          $ref: 'enum.yaml#/components/schemas/CourseLevel'
+        category:
+          $ref: 'enum.yaml#/components/schemas/CourseCategory'
+
+    UpdateCourseRequest:
+      type: object
+      description: |
+        Payload used to update an existing course. All fields are replaced.
+      required:
+        - name
+        - duration
+        - level
+        - category
+      properties:
+        name:
+          type: string
+          description: Updated name of the course.
+          example: Introduction to Spring Boot
+          maxLength: 200
+          minLength: 1
+          x-field-extra-annotation: "@NotBlank"
+        description:
+          type: string
+          description: Updated detailed description of the course content.
+          example: Learn the fundamentals of building REST APIs with Spring Boot.
+          maxLength: 1000
+        duration:
+          type: integer
+          format: int32
+          description: Updated total duration of the course, in hours.
+          example: 12
+          minimum: 1
+        level:
+          $ref: 'enum.yaml#/components/schemas/CourseLevel'
+        category:
+          $ref: 'enum.yaml#/components/schemas/CourseCategory'

@@ -1,0 +1,21 @@
+openapi: 3.1.0
+components:
+  schemas:
+    CourseLevel:
+      type: string
+      enum:
+        - BEGINNER
+        - INTERMEDIATE
+        - ADVANCED
+      description: "Enumerates the difficulty levels available for a course"
+
+    CourseCategory:
+      type: string
+      enum:
+        - PROGRAMMING
+        - DESIGN
+        - BUSINESS
+        - LANGUAGES
+        - SCIENCE
+        - ARTS
+      description: "Enumerates the categories available for a course"

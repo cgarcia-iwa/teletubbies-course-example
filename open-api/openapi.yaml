@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  title: TELETUBBIES COURSE API
+  description: |
+    This API is focused on performing CRUD type operations over courses.
+  contact:
+    email: contacto@iwa.com.mx
+  version: 0.0.1
+  x-logo:
+    backgroundColor: '#FFFFFF'
+    altText: 'Teletubbies Course'
+
+servers:
+  - url: 'http://{baseUrl}:{port}'
+    description: local
+    variables:
+      port:
+        enum:
+          - '8080'
+        default: '8080'
+      baseUrl:
+        default: localhost
+
+tags:
+  - name: courses
+
+paths:
+  '/courses':
+    post:
+      tags:
+        - courses
+      summary: Add a new course
+      description: |
+        This endpoint allows you to create a new course using a form.
+      operationId: createCourse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'requests.yaml#/components/schemas/NewCourseRequest'
+      responses:
+        201:
+          $ref: 'responses.yaml#/components/responses/CourseResponse'
+        400:
+          $ref: 'responses.yaml#/components/responses/BadRequest'
+        500:
+          $ref: 'responses.yaml#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - courses
+      summary: Get all courses
+      description: |
+        This endpoint retrieves the full list of registered courses.
+      operationId: getAllCourses
+      responses:
+        200:
+          $ref: 'responses.yaml#/components/responses/CoursesResponse'
+        500:
+          $ref: 'responses.yaml#/components/responses/InternalServerError'
+
+  '/courses/{courseId}':
+    put:
+      tags:
+        - courses
+      summary: Update course
+      description: |
+        This endpoint allows you to update an existing course based on its ID using a form.
+      operationId: updateCourse
+      parameters:
+        - $ref: 'parameters.yaml#/components/parameters/CourseId'
+      requestBody:
+        description: CourseForm contains properties of the course to be updated.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'requests.yaml#/components/schemas/UpdateCourseRequest'
+      responses:
+        200:
+          $ref: 'responses.yaml#/components/responses/CourseResponse'
+        400:
+          $ref: 'responses.yaml#/components/responses/BadRequest'
+        404:
+          $ref: 'responses.yaml#/components/responses/NotFound'
+        500:
+          $ref: 'responses.yaml#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - courses
+      summary: Delete course
+      description: |
+        This endpoint allows deleting an existing course based on its ID.
+      operationId: deleteCourse
+      parameters:
+        - $ref: 'parameters.yaml#/components/parameters/CourseId'
+      responses:
+        204:
+          $ref: 'responses.yaml#/components/responses/Successful'
+        404:
+          $ref: 'responses.yaml#/components/responses/NotFound'
+        500:
+          $ref: 'responses.yaml#/components/responses/InternalServerError'
+    get:
+      tags:
+        - courses
+      summary:  Get individual course
+      description: |
+        This endpoint return an existing course based on its ID.
+      operationId: getCourse
+      parameters:
+        - $ref: 'parameters.yaml#/components/parameters/CourseId'
+      responses:
+        200:
+          $ref: 'responses.yaml#/components/responses/CourseResponse'
+        404:
+          $ref: 'responses.yaml#/components/responses/NotFound'
+        500:
+          $ref: 'responses.yaml#/components/responses/InternalServerError'

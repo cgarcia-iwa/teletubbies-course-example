@@ -1,0 +1,38 @@
+openapi: 3.0.3
+components:
+  responses:
+    InternalServerError:
+      description: |
+        The request failed to be processed for reasons outside of the control of the client making the
+         original request.
+    BadRequest:
+      description: |
+        The server was unable to process the request due to an error attributed to the client. This can occur due to various reasons, such as:
+        - Mandatory parameters are missing in the request
+        - One or more parameters in the request are invalid
+        - The format of the request is incorrect
+    NotFound:
+      description: The requested record was not found on the server.
+    Conflict:
+      description: |
+        The request could not be processed due to a conflict in the request. The requested resource
+          is not in the expected state or the result of the request processing creates a conflict with
+          the resource.
+    Successful:
+      description: Successful server response
+
+    CourseResponse:
+      description: Response containing a single course.
+      content:
+        application/json:
+          schema:
+            $ref: './resources.yaml#/components/schemas/CourseResource'
+
+    CoursesResponse:
+      description: Response containing a list of courses.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: './resources.yaml#/components/schemas/CourseResource'

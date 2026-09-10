@@ -1,0 +1,22 @@
+{
+  "name": "open-api",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server",
+    "build": "swagger-cli bundle openapi.yaml --outfile build/openapi.yaml --type yaml"
+  },
+  "engines": {
+    "node": "20.x.x",
+    "yarn": "Please use npm",
+    "npm": "10.x"
+  },
+  "dependencies": {
+    "rapidoc": "^9.3.4"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "swagger-cli": "^4.0.4"
+  }
+}
