@@ -26,13 +26,21 @@ components:
       content:
         application/json:
           schema:
-            $ref: './resources.yaml#/components/schemas/CourseResource'
+            type: object
+            title: CourseResponse
+            properties:
+              course:
+                $ref: './resources.yaml#/components/schemas/CourseResource'
 
     CoursesResponse:
       description: Response containing a list of courses.
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: './resources.yaml#/components/schemas/CourseResource'
+            type: object
+            title: CoursesResponse
+            properties:
+              courses:
+                type: array
+                items:
+                  $ref: './resources.yaml#/components/schemas/CourseResource'
