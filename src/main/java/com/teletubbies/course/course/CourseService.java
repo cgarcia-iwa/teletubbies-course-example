@@ -55,6 +55,10 @@ public class CourseService {
     return updated;
   }
 
+  public CourseResource getById(final String courseId) {
+    return findByIdOrThrow(courseId);
+  }
+
   public void delete(final String courseId) {
     findByIdOrThrow(courseId);
     courses.remove(courseId);

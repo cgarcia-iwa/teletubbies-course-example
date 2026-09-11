@@ -35,6 +35,11 @@ public class CourseController implements CoursesApi {
   }
 
   @Override
+  public ResponseEntity<CourseResource> getCourse(final String courseId) {
+    return ResponseEntity.ok(courseService.getById(courseId));
+  }
+
+  @Override
   public ResponseEntity<Void> deleteCourse(final String courseId) {
     courseService.delete(courseId);
     return ResponseEntity.noContent().build();
