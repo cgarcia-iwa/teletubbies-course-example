@@ -33,3 +33,6 @@ build/
 
 ### OPEN API ###
 open-api/node_modules
+
+### ENV ###
+local.env
