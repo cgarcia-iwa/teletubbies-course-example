@@ -1,0 +1,21 @@
+services:
+  db_postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${DB_SCHEMA}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USERNAME}
+    restart: always
+    ports:
+      - mode: ingress
+        target: 5432
+        published: 5433
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: ./postgres/postgresql.conf
+        target: /etc/postgresql/postgresql.conf
+      - type: bind
+        source: ./postgres/init.sh
+        target: /docker-entrypoint-initdb.d/1-init.sh
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]

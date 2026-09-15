@@ -19,13 +19,13 @@ components:
           type: string
           description: Name of the course.
           example: Introduction to Spring Boot
-          maxLength: 200
+          maxLength: 100
           minLength: 1
         description:
           type: string
           description: Detailed description of the course content.
           example: Learn the fundamentals of building REST APIs with Spring Boot.
-          maxLength: 1000
+          maxLength: 200
         duration:
           type: integer
           format: int32
