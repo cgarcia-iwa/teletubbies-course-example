@@ -3,16 +3,24 @@
 ### Technologies
 1. Java 25
 2. Spring boot 4.1.1
+3. Postgres 17
+4. Docker Compose
+
+### Generate open API resources
+
+```bash
+make openapi-generate
+```
 
 ### Build
 
 ```bash
-./mvnw clean install 
+make build
 ```
 ### Run
 
-```
-./mvnw spring-boot:run
+```bash
+make run
 ```
 
 ### Database (PostgreSQL via Docker)
