@@ -1,7 +1,5 @@
 package com.teletubbies.course.course;
 
-import com.teletubbies.course.model.CourseCategory;
-import com.teletubbies.course.model.CourseLevel;
 import com.teletubbies.course.model.CourseResource;
 import com.teletubbies.course.model.NewCourseRequest;
 import com.teletubbies.course.model.UpdateCourseRequest;
@@ -79,24 +77,24 @@ public class CourseService {
                 .name("Introduction to Spring Boot")
                 .description("Learn the fundamentals of building REST APIs with Spring Boot.")
                 .duration(12)
-                .level(CourseLevel.BEGINNER)
-                .category(CourseCategory.PROGRAMMING)
+                .level(CourseLevelType.BEGINNER)
+                .category(CourseCategoryType.PROGRAMMING)
                 .build(),
             CourseResource.builder()
                 .id("dos")
                 .name("UI Design with Figma")
                 .description("UI/UX design principles applied with Figma.")
                 .duration(8)
-                .level(CourseLevel.INTERMEDIATE)
-                .category(CourseCategory.DESIGN)
+                .level(CourseLevelType.INTERMEDIATE)
+                .category(CourseCategoryType.DESIGN)
                 .build(),
             CourseResource.builder()
                 .id("tres")
                 .name("Business English")
                 .description("Vocabulary and conversation focused on business environments.")
                 .duration(20)
-                .level(CourseLevel.ADVANCED)
-                .category(CourseCategory.LANGUAGES)
+                .level(CourseLevelType.ADVANCED)
+                .category(CourseCategoryType.LANGUAGES)
                 .build())
         .forEach(course -> courses.put(course.getId(), course));
   }
