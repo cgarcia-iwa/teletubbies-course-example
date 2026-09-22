@@ -19,7 +19,7 @@ public enum CourseLevelType {
   INTERMEDIATE(2),
   ADVANCED(3);
 
-  private final Short key;
+  private final short key;
 
   CourseLevelType(final int key) {
     this.key = (short) key;
@@ -38,9 +38,9 @@ public enum CourseLevelType {
         .orElseThrow(() -> new IllegalArgumentException("Unexpected value '" + value + "'"));
   }
 
-  public static CourseLevelType fromKey(final Short key) {
+  public static CourseLevelType fromKey(final short key) {
     return Arrays.stream(CourseLevelType.values())
-        .filter(level -> level.key.equals(key))
+        .filter(level -> level.key == key)
         .findFirst()
         .orElseThrow(
             () -> new IllegalArgumentException("Unexpected course level key '" + key + "'"));

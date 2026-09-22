@@ -22,7 +22,7 @@ public enum CourseCategoryType {
   SCIENCE(5),
   ARTS(6);
 
-  private final Short key;
+  private final short key;
 
   CourseCategoryType(final int key) {
     this.key = (short) key;
@@ -41,9 +41,9 @@ public enum CourseCategoryType {
         .orElseThrow(() -> new IllegalArgumentException("Unexpected value '" + value + "'"));
   }
 
-  public static CourseCategoryType fromKey(final Short key) {
+  public static CourseCategoryType fromKey(final short key) {
     return Arrays.stream(CourseCategoryType.values())
-        .filter(category -> category.key.equals(key))
+        .filter(category -> category.key == key)
         .findFirst()
         .orElseThrow(
             () -> new IllegalArgumentException("Unexpected course category key '" + key + "'"));
