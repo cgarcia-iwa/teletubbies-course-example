@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Enumerates the categories available for a course.
@@ -15,16 +14,19 @@ import lombok.RequiredArgsConstructor;
  * separate, ordinal-position-dependent mapping.
  */
 @Getter
-@RequiredArgsConstructor
 public enum CourseCategoryType {
-  PROGRAMMING((short) 1),
-  DESIGN((short) 2),
-  BUSINESS((short) 3),
-  LANGUAGES((short) 4),
-  SCIENCE((short) 5),
-  ARTS((short) 6);
+  PROGRAMMING(1),
+  DESIGN(2),
+  BUSINESS(3),
+  LANGUAGES(4),
+  SCIENCE(5),
+  ARTS(6);
 
   private final Short key;
+
+  CourseCategoryType(final int key) {
+    this.key = (short) key;
+  }
 
   @JsonValue
   public String getValue() {

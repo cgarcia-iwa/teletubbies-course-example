@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Enumerates the difficulty levels available for a course.
@@ -15,13 +14,16 @@ import lombok.RequiredArgsConstructor;
  * ordinal-position-dependent mapping.
  */
 @Getter
-@RequiredArgsConstructor
 public enum CourseLevelType {
-  BEGINNER((short) 1),
-  INTERMEDIATE((short) 2),
-  ADVANCED((short) 3);
+  BEGINNER(1),
+  INTERMEDIATE(2),
+  ADVANCED(3);
 
   private final Short key;
+
+  CourseLevelType(final int key) {
+    this.key = (short) key;
+  }
 
   @JsonValue
   public String getValue() {
