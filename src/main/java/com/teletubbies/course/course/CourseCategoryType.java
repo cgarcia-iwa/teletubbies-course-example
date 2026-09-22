@@ -17,14 +17,14 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum CourseCategoryType {
-  PROGRAMMING(1),
-  DESIGN(2),
-  BUSINESS(3),
-  LANGUAGES(4),
-  SCIENCE(5),
-  ARTS(6);
+  PROGRAMMING((short) 1),
+  DESIGN((short) 2),
+  BUSINESS((short) 3),
+  LANGUAGES((short) 4),
+  SCIENCE((short) 5),
+  ARTS((short) 6);
 
-  private final Integer key;
+  private final Short key;
 
   @JsonValue
   public String getValue() {
@@ -39,7 +39,7 @@ public enum CourseCategoryType {
         .orElseThrow(() -> new IllegalArgumentException("Unexpected value '" + value + "'"));
   }
 
-  public static CourseCategoryType fromKey(final Integer key) {
+  public static CourseCategoryType fromKey(final Short key) {
     return Arrays.stream(CourseCategoryType.values())
         .filter(category -> category.key.equals(key))
         .findFirst()

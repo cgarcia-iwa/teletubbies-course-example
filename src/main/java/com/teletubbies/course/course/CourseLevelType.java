@@ -17,11 +17,11 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum CourseLevelType {
-  BEGINNER(1),
-  INTERMEDIATE(2),
-  ADVANCED(3);
+  BEGINNER((short) 1),
+  INTERMEDIATE((short) 2),
+  ADVANCED((short) 3);
 
-  private final Integer key;
+  private final Short key;
 
   @JsonValue
   public String getValue() {
@@ -36,7 +36,7 @@ public enum CourseLevelType {
         .orElseThrow(() -> new IllegalArgumentException("Unexpected value '" + value + "'"));
   }
 
-  public static CourseLevelType fromKey(final Integer key) {
+  public static CourseLevelType fromKey(final Short key) {
     return Arrays.stream(CourseLevelType.values())
         .filter(level -> level.key.equals(key))
         .findFirst()

@@ -5,6 +5,10 @@ spring:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_SCHEMA}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
   flyway:
     enabled: true
     locations: classpath:db/migration

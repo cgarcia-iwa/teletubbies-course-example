@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -31,7 +32,7 @@ public class CourseEntity implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(nullable = false, unique = true)
-  private String id;
+  private UUID id;
 
   @Column(name = "name", length = 100, nullable = false)
   private String name;
@@ -40,7 +41,7 @@ public class CourseEntity implements Serializable {
   private String description;
 
   @Column(name = "duration", nullable = false)
-  private Integer duration;
+  private Short duration;
 
   @Column(name = "level", nullable = false, columnDefinition = "smallint")
   private CourseLevelType level;
@@ -51,7 +52,7 @@ public class CourseEntity implements Serializable {
   public CourseEntity(final NewCourseRequest request) {
     this.name = request.getName();
     this.description = request.getDescription();
-    this.duration = request.getDuration();
+    this.duration = request.getDuration().shortValue();
     this.level = request.getLevel();
     this.category = request.getCategory();
   }
@@ -59,7 +60,7 @@ public class CourseEntity implements Serializable {
   public void update(final UpdateCourseRequest request) {
     this.name = request.getName();
     this.description = request.getDescription();
-    this.duration = request.getDuration();
+    this.duration = request.getDuration().shortValue();
     this.level = request.getLevel();
     this.category = request.getCategory();
   }
