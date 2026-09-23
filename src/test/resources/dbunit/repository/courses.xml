@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+	<instructor
+		id="00000000-0000-0000-0000-000000000001"
+		full_name="Laa-Laa"
+		email="laalaa@teletubbies.test" />
+
+	<course
+		id="00000000-0000-0000-0000-000000000101"
+		name="Introduction to Spring Boot"
+		description="Learn the fundamentals of building REST APIs with Spring Boot."
+		duration="12"
+		level="1"
+		category="1"
+		instructor_id="00000000-0000-0000-0000-000000000001" />
+
+	<course
+		id="00000000-0000-0000-0000-000000000102"
+		name="UI Design with Figma"
+		description="UI/UX design principles applied with Figma."
+		duration="8"
+		level="2"
+		category="2"
+		instructor_id="00000000-0000-0000-0000-000000000001" />
+</dataset>

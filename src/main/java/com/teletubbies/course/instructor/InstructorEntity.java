@@ -1,5 +1,7 @@
 package com.teletubbies.course.instructor;
 
+import com.teletubbies.course.model.NewInstructorRequest;
+import com.teletubbies.course.model.UpdateInstructorRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,4 +42,14 @@ public class InstructorEntity implements Serializable {
 
   @Column(name = "email", length = 150, nullable = false)
   private String email;
+
+  public InstructorEntity(final NewInstructorRequest request) {
+    this.fullName = request.getFullName();
+    this.email = request.getEmail();
+  }
+
+  public void update(final UpdateInstructorRequest request) {
+    this.fullName = request.getFullName();
+    this.email = request.getEmail();
+  }
 }

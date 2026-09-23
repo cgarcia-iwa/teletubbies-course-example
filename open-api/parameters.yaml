@@ -8,3 +8,11 @@ components:
       required: true
       schema:
         type: string
+
+    InstructorId:
+      name: instructorId
+      in: path
+      description: The instructor's ID.
+      required: true
+      schema:
+        type: string

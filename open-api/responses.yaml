@@ -44,3 +44,27 @@ components:
                 type: array
                 items:
                   $ref: './resources.yaml#/components/schemas/CourseResource'
+
+    InstructorResponse:
+      description: Response containing a single instructor.
+      content:
+        application/json:
+          schema:
+            type: object
+            title: InstructorResponse
+            properties:
+              instructor:
+                $ref: './resources.yaml#/components/schemas/InstructorResource'
+
+    InstructorsResponse:
+      description: Response containing a list of instructors.
+      content:
+        application/json:
+          schema:
+            type: object
+            title: InstructorsResponse
+            properties:
+              instructors:
+                type: array
+                items:
+                  $ref: './resources.yaml#/components/schemas/InstructorResource'

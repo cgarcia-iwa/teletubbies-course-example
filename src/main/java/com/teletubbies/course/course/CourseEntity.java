@@ -49,12 +49,17 @@ public class CourseEntity implements Serializable {
   @Column(name = "category", nullable = false, columnDefinition = "smallint")
   private CourseCategoryType category;
 
+  // Solo se guarda el id; todavia sin relacion JPA con InstructorEntity.
+  @Column(name = "instructor_id", nullable = false)
+  private UUID instructorId;
+
   public CourseEntity(final NewCourseRequest request) {
     this.name = request.getName();
     this.description = request.getDescription();
     this.duration = request.getDuration().shortValue();
     this.level = request.getLevel();
     this.category = request.getCategory();
+    this.instructorId = UUID.fromString(request.getInstructorId());
   }
 
   public void update(final UpdateCourseRequest request) {
@@ -63,5 +68,6 @@ public class CourseEntity implements Serializable {
     this.duration = request.getDuration().shortValue();
     this.level = request.getLevel();
     this.category = request.getCategory();
+    this.instructorId = UUID.fromString(request.getInstructorId());
   }
 }

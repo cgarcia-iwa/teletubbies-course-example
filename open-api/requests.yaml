@@ -10,6 +10,7 @@ components:
         - duration
         - level
         - category
+        - instructorId
       properties:
         name:
           type: string
@@ -33,6 +34,13 @@ components:
           $ref: 'enum.yaml#/components/schemas/CourseLevel'
         category:
           $ref: 'enum.yaml#/components/schemas/CourseCategory'
+        instructorId:
+          type: string
+          description: Identifier of the instructor who teaches the course.
+          example: da2d455e-db3a-45ce-abfa-ee59a228b5f8
+          maxLength: 36
+          minLength: 1
+          x-field-extra-annotation: "@NotBlank"
 
     UpdateCourseRequest:
       type: object
@@ -43,6 +51,7 @@ components:
         - duration
         - level
         - category
+        - instructorId
       properties:
         name:
           type: string
@@ -66,3 +75,58 @@ components:
           $ref: 'enum.yaml#/components/schemas/CourseLevel'
         category:
           $ref: 'enum.yaml#/components/schemas/CourseCategory'
+        instructorId:
+          type: string
+          description: Identifier of the instructor who teaches the course.
+          example: da2d455e-db3a-45ce-abfa-ee59a228b5f8
+          maxLength: 36
+          minLength: 1
+          x-field-extra-annotation: "@NotBlank"
+
+    NewInstructorRequest:
+      type: object
+      description: |
+        Payload used to create a new instructor.
+      required:
+        - fullName
+        - email
+      properties:
+        fullName:
+          type: string
+          description: Full name of the instructor. Must be unique.
+          example: Laa-Laa
+          maxLength: 150
+          minLength: 1
+          x-field-extra-annotation: "@NotBlank"
+        email:
+          type: string
+          format: email
+          description: Contact email address of the instructor. Must be unique.
+          example: laalaa@teletubbies.test
+          maxLength: 150
+          minLength: 1
+          x-field-extra-annotation: "@NotBlank"
+
+    UpdateInstructorRequest:
+      type: object
+      description: |
+        Payload used to update an existing instructor. All fields are replaced.
+      required:
+        - fullName
+        - email
+      properties:
+        fullName:
+          type: string
+          description: Updated full name of the instructor. Must be unique.
+          example: Laa-Laa
+          maxLength: 150
+          minLength: 1
+          x-field-extra-annotation: "@NotBlank"
+        email:
+          type: string
+          format: email
+          description: Updated contact email address of the instructor. Must be unique.
+          example: laalaa@teletubbies.test
+          maxLength: 150
+          minLength: 1
+          x-field-extra-annotation: "@NotBlank"

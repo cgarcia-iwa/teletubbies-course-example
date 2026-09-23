@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: TELETUBBIES COURSE API
   description: |
-    This API is focused on performing CRUD type operations over courses.
+    This API is focused on performing CRUD type operations over courses and instructors.
   contact:
     email: contacto@iwa.com.mx
   version: 0.0.1
@@ -23,6 +23,7 @@ servers:
 
 tags:
   - name: courses
+  - name: instructors
 
 paths:
   '/courses':
@@ -44,6 +45,8 @@ paths:
           $ref: 'responses.yaml#/components/responses/CourseResponse'
         400:
           $ref: 'responses.yaml#/components/responses/BadRequest'
+        409:
+          $ref: 'responses.yaml#/components/responses/Conflict'
         500:
           $ref: 'responses.yaml#/components/responses/InternalServerError'
 
@@ -84,6 +87,8 @@ paths:
           $ref: 'responses.yaml#/components/responses/BadRequest'
         404:
           $ref: 'responses.yaml#/components/responses/NotFound'
+        409:
+          $ref: 'responses.yaml#/components/responses/Conflict'
         500:
           $ref: 'responses.yaml#/components/responses/InternalServerError'
 
@@ -117,5 +122,110 @@ paths:
           $ref: 'responses.yaml#/components/responses/CourseResponse'
         404:
           $ref: 'responses.yaml#/components/responses/NotFound'
+        500:
+          $ref: 'responses.yaml#/components/responses/InternalServerError'
+
+  '/instructors':
+    post:
+      tags:
+        - instructors
+      summary: Add a new instructor
+      description: |
+        This endpoint allows you to create a new instructor using a form.
+        Full name and email must be unique.
+      operationId: createInstructor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'requests.yaml#/components/schemas/NewInstructorRequest'
+      responses:
+        201:
+          $ref: 'responses.yaml#/components/responses/InstructorResponse'
+        400:
+          $ref: 'responses.yaml#/components/responses/BadRequest'
+        409:
+          $ref: 'responses.yaml#/components/responses/Conflict'
+        500:
+          $ref: 'responses.yaml#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - instructors
+      summary: Get all instructors
+      description: |
+        This endpoint retrieves the full list of registered instructors.
+      operationId: getAllInstructors
+      responses:
+        200:
+          $ref: 'responses.yaml#/components/responses/InstructorsResponse'
+        500:
+          $ref: 'responses.yaml#/components/responses/InternalServerError'
+
+  '/instructors/{instructorId}':
+    get:
+      tags:
+        - instructors
+      summary: Get individual instructor
+      description: |
+        This endpoint returns an existing instructor based on its ID.
+      operationId: getInstructor
+      parameters:
+        - $ref: 'parameters.yaml#/components/parameters/InstructorId'
+      responses:
+        200:
+          $ref: 'responses.yaml#/components/responses/InstructorResponse'
+        404:
+          $ref: 'responses.yaml#/components/responses/NotFound'
+        500:
+          $ref: 'responses.yaml#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - instructors
+      summary: Update instructor
+      description: |
+        This endpoint allows you to update an existing instructor based on its ID using a form.
+        Full name and email must remain unique.
+      operationId: updateInstructor
+      parameters:
+        - $ref: 'parameters.yaml#/components/parameters/InstructorId'
+      requestBody:
+        description: InstructorForm contains properties of the instructor to be updated.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'requests.yaml#/components/schemas/UpdateInstructorRequest'
+      responses:
+        200:
+          $ref: 'responses.yaml#/components/responses/InstructorResponse'
+        400:
+          $ref: 'responses.yaml#/components/responses/BadRequest'
+        404:
+          $ref: 'responses.yaml#/components/responses/NotFound'
+        409:
+          $ref: 'responses.yaml#/components/responses/Conflict'
+        500:
+          $ref: 'responses.yaml#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - instructors
+      summary: Delete instructor
+      description: |
+        This endpoint allows deleting an existing instructor based on its ID.
+        An instructor assigned to courses cannot be deleted.
+      operationId: deleteInstructor
+      parameters:
+        - $ref: 'parameters.yaml#/components/parameters/InstructorId'
+      responses:
+        204:
+          $ref: 'responses.yaml#/components/responses/Successful'
+        404:
+          $ref: 'responses.yaml#/components/responses/NotFound'
+        409:
+          $ref: 'responses.yaml#/components/responses/Conflict'
         500:
           $ref: 'responses.yaml#/components/responses/InternalServerError'

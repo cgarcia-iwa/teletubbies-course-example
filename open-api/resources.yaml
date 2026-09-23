@@ -8,6 +8,7 @@ components:
         - duration
         - level
         - category
+        - instructorId
       type: object
       description: Course data returned by the API.
       properties:
@@ -36,3 +37,32 @@ components:
           $ref: 'enum.yaml#/components/schemas/CourseLevel'
         category:
           $ref: 'enum.yaml#/components/schemas/CourseCategory'
+        instructorId:
+          type: string
+          description: Identifier of the instructor who teaches the course.
+          example: da2d455e-db3a-45ce-abfa-ee59a228b5f8
+
+    InstructorResource:
+      required:
+        - id
+        - fullName
+        - email
+      type: object
+      description: Instructor data returned by the API.
+      properties:
+        id:
+          type: string
+          description: Unique instructor identifier.
+          example: da2d455e-db3a-45ce-abfa-ee59a228b5f8
+        fullName:
+          type: string
+          description: Full name of the instructor.
+          example: Laa-Laa
+          maxLength: 150
+          minLength: 1
+        email:
+          type: string
+          format: email
+          description: Contact email address of the instructor.
+          example: laalaa@teletubbies.test
+          maxLength: 150
