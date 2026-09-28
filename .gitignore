@@ -36,3 +36,6 @@ open-api/node_modules
 
 ### ENV ###
 local.env
+
+### COURSE MATERIAL (local only) ###
+/docs/

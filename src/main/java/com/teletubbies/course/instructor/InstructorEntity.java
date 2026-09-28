@@ -32,7 +32,7 @@ import lombok.ToString;
 @EqualsAndHashCode(of = "id")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString
+@ToString(exclude = "password")
 public class InstructorEntity implements Serializable {
   @Serial private static final long serialVersionUID = 1L;
 
@@ -47,13 +47,27 @@ public class InstructorEntity implements Serializable {
   @Column(name = "email", length = 150, nullable = false)
   private String email;
 
+  // BCrypt hash, never the plain-text password. Null = the instructor cannot log in.
+  @Column(name = "password", length = 100)
+  private String password;
+
   public InstructorEntity(final NewInstructorRequest request) {
     this.fullName = request.getFullName();
     this.email = request.getEmail();
   }
 
+  public InstructorEntity(final String fullName, final String email, final String passwordHash) {
+    this.fullName = fullName;
+    this.email = email;
+    this.password = passwordHash;
+  }
+
   public void update(final UpdateInstructorRequest request) {
     this.fullName = request.getFullName();
     this.email = request.getEmail();
+  }
+
+  public void changePassword(final String passwordHash) {
+    this.password = passwordHash;
   }
 }
