@@ -33,7 +33,7 @@ import lombok.ToString;
 @EqualsAndHashCode(of = "id")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString
+@ToString(exclude = "instructor")
 public class CourseEntity implements Serializable {
   @Serial private static final long serialVersionUID = 1L;
 

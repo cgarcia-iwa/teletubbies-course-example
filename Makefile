@@ -16,3 +16,6 @@ run:
 
 openapi-generate:
 	$(MVNW) org.openapitools:openapi-generator-maven-plugin:generate@openapi
+
+test:
+	$(MVNW) clean test
