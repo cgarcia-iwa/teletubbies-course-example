@@ -1,16 +1,24 @@
 package com.teletubbies.course.course;
 
+import com.teletubbies.course.instructor.InstructorEntity;
 import com.teletubbies.course.model.NewCourseRequest;
 import com.teletubbies.course.model.UpdateCourseRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -49,9 +57,13 @@ public class CourseEntity implements Serializable {
   @Column(name = "category", nullable = false, columnDefinition = "smallint")
   private CourseCategoryType category;
 
-  // Solo se guarda el id; todavia sin relacion JPA con InstructorEntity.
+
   @Column(name = "instructor_id", nullable = false)
   private UUID instructorId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "instructor_id", nullable = false, insertable = false, updatable = false)
+  private InstructorEntity instructor;
 
   public CourseEntity(final NewCourseRequest request) {
     this.name = request.getName();

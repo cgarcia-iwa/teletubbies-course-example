@@ -1,16 +1,20 @@
 package com.teletubbies.course.course;
 
+import com.teletubbies.course.instructor.InstructorEntity;
 import com.teletubbies.course.instructor.InstructorRepository;
 import com.teletubbies.course.model.CourseResource;
+import com.teletubbies.course.model.InstructorResource;
 import com.teletubbies.course.model.NewCourseRequest;
 import com.teletubbies.course.model.UpdateCourseRequest;
 import java.util.List;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+@Slf4j
 @Service
 public class CourseService {
 
@@ -96,7 +100,15 @@ public class CourseService {
         .duration(course.getDuration().intValue())
         .level(course.getLevel())
         .category(course.getCategory())
-        .instructorId(course.getInstructorId().toString())
+        .instructor(toResource(course.getInstructor()))
+        .build();
+  }
+
+  private InstructorResource toResource(final InstructorEntity instructor) {
+    return InstructorResource.builder()
+        .id(instructor.getId().toString())
+        .fullName(instructor.getFullName())
+        .email(instructor.getEmail())
         .build();
   }
 }

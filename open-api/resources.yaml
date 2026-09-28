@@ -8,7 +8,7 @@ components:
         - duration
         - level
         - category
-        - instructorId
+        - instructor
       type: object
       description: Course data returned by the API.
       properties:
@@ -37,10 +37,8 @@ components:
           $ref: 'enum.yaml#/components/schemas/CourseLevel'
         category:
           $ref: 'enum.yaml#/components/schemas/CourseCategory'
-        instructorId:
-          type: string
-          description: Identifier of the instructor who teaches the course.
-          example: da2d455e-db3a-45ce-abfa-ee59a228b5f8
+        instructor:
+          $ref: '#/components/schemas/InstructorResource'
 
     InstructorResource:
       required:
