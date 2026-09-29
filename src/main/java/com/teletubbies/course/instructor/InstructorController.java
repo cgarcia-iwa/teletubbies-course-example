@@ -1,5 +1,7 @@
 package com.teletubbies.course.instructor;
 
+import org.springframework.web.bind.annotation.RestController;
+
 import com.teletubbies.course.InstructorsApi;
 import com.teletubbies.course.model.InstructorResponse;
 import com.teletubbies.course.model.InstructorsResponse;
@@ -7,7 +9,7 @@ import com.teletubbies.course.model.NewInstructorRequest;
 import com.teletubbies.course.model.UpdateInstructorRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 public class InstructorController implements InstructorsApi {
@@ -19,6 +21,7 @@ public class InstructorController implements InstructorsApi {
   }
 
   @Override
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   public ResponseEntity<InstructorResponse> createInstructor(
       final NewInstructorRequest newInstructorRequest) {
     return ResponseEntity.status(HttpStatus.CREATED)
@@ -29,18 +32,21 @@ public class InstructorController implements InstructorsApi {
   }
 
   @Override
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'TEACHER')")
   public ResponseEntity<InstructorsResponse> getAllInstructors() {
     return ResponseEntity.ok(
         InstructorsResponse.builder().instructors(instructorService.getAll()).build());
   }
 
   @Override
+  @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'TEACHER')")
   public ResponseEntity<InstructorResponse> getInstructor(final String instructorId) {
     return ResponseEntity.ok(
         InstructorResponse.builder().instructor(instructorService.getById(instructorId)).build());
   }
 
   @Override
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   public ResponseEntity<InstructorResponse> updateInstructor(
       final String instructorId, final UpdateInstructorRequest updateInstructorRequest) {
     return ResponseEntity.ok(
@@ -50,6 +56,7 @@ public class InstructorController implements InstructorsApi {
   }
 
   @Override
+  @PreAuthorize("hasRole('ADMINISTRATOR')")
   public ResponseEntity<Void> deleteInstructor(final String instructorId) {
     instructorService.delete(instructorId);
     return ResponseEntity.noContent().build();

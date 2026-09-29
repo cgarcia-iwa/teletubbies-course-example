@@ -19,3 +19,10 @@ components:
         - SCIENCE
         - ARTS
       description: "Enumerates the categories available for a course"
+
+    InstructorRole:
+      type: string
+      enum:
+        - ADMINISTRATOR
+        - TEACHER
+      description: "Enumerates the roles an instructor can have"

@@ -1,7 +1,6 @@
 package com.teletubbies.course.instructor;
 
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -11,20 +10,26 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class AdminInstructorSeeder implements CommandLineRunner {
 
   private final InstructorRepository instructorRepository;
   private final PasswordEncoder passwordEncoder;
-
-  @Value("${app.admin.full-name}")
   private final String fullName;
-
-  @Value("${app.admin.email}")
   private final String email;
-
-  @Value("${app.admin.password}")
   private final String password;
+
+  public AdminInstructorSeeder(
+      InstructorRepository instructorRepository,
+      PasswordEncoder passwordEncoder,
+      @Value("${app.admin.full-name}") String fullName,
+      @Value("${app.admin.email}") String email,
+      @Value("${app.admin.password}") String password) {
+    this.instructorRepository = instructorRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.fullName = fullName;
+    this.email = email;
+    this.password = password;
+  }
 
   @Override
   @Transactional
@@ -37,7 +42,8 @@ public class AdminInstructorSeeder implements CommandLineRunner {
     final Optional<InstructorEntity> existing = instructorRepository.findByEmail(email);
     if (existing.isEmpty()) {
       instructorRepository.save(
-          new InstructorEntity(fullName, email, passwordEncoder.encode(password)));
+              new InstructorEntity(
+                      fullName, email, passwordEncoder.encode(password), InstructorRoleType.ADMINISTRATOR));
       log.info("Created admin instructor '{}'", email);
       return;
     }
@@ -45,8 +51,11 @@ public class AdminInstructorSeeder implements CommandLineRunner {
     final InstructorEntity instructor = existing.get();
     if (instructor.getPassword() == null) {
       instructor.changePassword(passwordEncoder.encode(password));
-      instructorRepository.save(instructor);
-      log.info("Assigned password to admin instructor '{}'", email);
     }
+    if (instructor.getRole() != InstructorRoleType.ADMINISTRATOR) {
+      instructor.changeRole(InstructorRoleType.ADMINISTRATOR);
+      log.info("Promoted '{}' to ADMINISTRATOR", email);
+    }
+    instructorRepository.save(instructor);
   }
 }
