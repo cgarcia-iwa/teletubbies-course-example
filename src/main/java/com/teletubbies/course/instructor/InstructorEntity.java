@@ -1,20 +1,20 @@
 package com.teletubbies.course.instructor;
 
-import com.teletubbies.course.course.CourseEntity;
 import com.teletubbies.course.model.NewInstructorRequest;
 import com.teletubbies.course.model.UpdateInstructorRequest;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -47,19 +47,29 @@ public class InstructorEntity implements Serializable {
   @Column(name = "email", length = 150, nullable = false)
   private String email;
 
-  // BCrypt hash, never the plain-text password. Null = the instructor cannot log in.
+  // Hash BCrypt, never the plain-text password. Null = the instructor cannot log in.
   @Column(name = "password", length = 100)
   private String password;
 
-  public InstructorEntity(final NewInstructorRequest request) {
+  @Column(name = "role", nullable = false, columnDefinition = "smallint")
+  private InstructorRoleType role;
+
+  public InstructorEntity(final NewInstructorRequest request, final String passwordHash) {
     this.fullName = request.getFullName();
     this.email = request.getEmail();
+    this.password = passwordHash;
+    this.role = Optional.ofNullable(request.getRole()).orElse(InstructorRoleType.TEACHER);
   }
 
-  public InstructorEntity(final String fullName, final String email, final String passwordHash) {
+  public InstructorEntity(
+      final String fullName,
+      final String email,
+      final String passwordHash,
+      final InstructorRoleType role) {
     this.fullName = fullName;
     this.email = email;
     this.password = passwordHash;
+    this.role = role;
   }
 
   public void update(final UpdateInstructorRequest request) {
@@ -69,5 +79,9 @@ public class InstructorEntity implements Serializable {
 
   public void changePassword(final String passwordHash) {
     this.password = passwordHash;
+  }
+
+  public void changeRole(final InstructorRoleType role) {
+    this.role = role;
   }
 }

@@ -1,3 +1,3 @@
 package com.teletubbies.course.auth;
 
-public record LoginResponse(String token, String tokenType, long expiresIn) {}
+public record LoginResponse(String token, String tokenType, long expiresIn, String role) {}

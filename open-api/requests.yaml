@@ -106,6 +106,16 @@ components:
           maxLength: 150
           minLength: 1
           x-field-extra-annotation: "@NotBlank"
+        password:
+          type: string
+          format: password
+          writeOnly: true
+          description: Initial password. If omitted, the instructor cannot log in.
+          example: s3cret-pass
+          minLength: 7
+          maxLength: 12
+        role:
+          $ref: 'enum.yaml#/components/schemas/InstructorRole'
 
     UpdateInstructorRequest:
       type: object

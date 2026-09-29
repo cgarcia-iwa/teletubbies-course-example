@@ -28,7 +28,6 @@ public class InstructorUserDetailsService implements UserDetailsService {
       throw new UsernameNotFoundException("Instructor has no password: " + email);
     }
 
-    // Class 2: add .roles(instructor.getRole().name()) here
-    return User.withUsername(instructor.getEmail()).password(instructor.getPassword()).build();
+    return User.withUsername(instructor.getEmail()).password(instructor.getPassword()).roles(instructor.getRole().name()).build();
   }
 }

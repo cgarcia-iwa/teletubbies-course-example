@@ -5,23 +5,23 @@ import com.teletubbies.course.model.InstructorResource;
 import com.teletubbies.course.model.NewInstructorRequest;
 import com.teletubbies.course.model.UpdateInstructorRequest;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@RequiredArgsConstructor
 public class InstructorService {
 
   private final InstructorRepository instructorRepository;
   private final CourseRepository courseRepository;
-
-  public InstructorService(
-      final InstructorRepository instructorRepository, final CourseRepository courseRepository) {
-    this.instructorRepository = instructorRepository;
-    this.courseRepository = courseRepository;
-  }
+  private final PasswordEncoder passwordEncoder;
 
   @Transactional(readOnly = true)
   public List<InstructorResource> getAll() {
@@ -41,7 +41,9 @@ public class InstructorService {
     if (instructorRepository.existsByEmail(request.getEmail())) {
       throw conflict("Instructor email already exists: " + request.getEmail());
     }
-    return toResource(instructorRepository.save(new InstructorEntity(request)));
+    final String passwordHash =
+        Optional.ofNullable(request.getPassword()).map(passwordEncoder::encode).orElse(null);
+    return toResource(instructorRepository.save(new InstructorEntity(request, passwordHash)));
   }
 
   @Transactional
@@ -66,13 +68,18 @@ public class InstructorService {
     instructorRepository.delete(instructor);
   }
 
-  private InstructorEntity findByIdOrThrow(final String instructorId) {
+  private UUID idOrThrow(final String instructorId) {
     final UUID id;
     try {
       id = UUID.fromString(instructorId);
     } catch (final IllegalArgumentException e) {
       throw notFound(instructorId);
     }
+    return id;
+  }
+
+  private InstructorEntity findByIdOrThrow(final String instructorId) {
+    final UUID id = idOrThrow(instructorId);
     return instructorRepository.findById(id).orElseThrow(() -> notFound(instructorId));
   }
 
@@ -89,6 +96,7 @@ public class InstructorService {
         .id(instructor.getId().toString())
         .fullName(instructor.getFullName())
         .email(instructor.getEmail())
+        .role(instructor.getRole())
         .build();
   }
 }

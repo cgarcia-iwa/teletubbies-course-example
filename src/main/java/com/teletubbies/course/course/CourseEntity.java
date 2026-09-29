@@ -20,11 +20,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+
+import lombok.*;
 
 @Entity
 @Table(
@@ -61,6 +58,7 @@ public class CourseEntity implements Serializable {
   @Column(name = "instructor_id", nullable = false)
   private UUID instructorId;
 
+  @Setter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "instructor_id", nullable = false, insertable = false, updatable = false)
   private InstructorEntity instructor;

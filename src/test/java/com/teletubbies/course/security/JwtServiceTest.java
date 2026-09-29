@@ -20,7 +20,7 @@ class JwtServiceTest {
               "test-only-secret-with-at-least-32-bytes!".getBytes(StandardCharsets.UTF_8));
 
   private static final UserDetails INSTRUCTOR =
-      User.withUsername("laalaa@teletubbies.test").password("irrelevant").build();
+      User.withUsername("laalaa@teletubbies.test").password("irrelevant").roles("ADMINISTRATOR").build();
 
   private final JwtService jwtService =
       new JwtService(new JwtProperties(SECRET, Duration.ofMinutes(5)));

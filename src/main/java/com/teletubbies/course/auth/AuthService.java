@@ -33,7 +33,8 @@ public class AuthService {
     }
 
     final UserDetails user = (UserDetails) authentication.getPrincipal();
+    final String token = jwtService.generateToken(user);
     return new LoginResponse(
-        jwtService.generateToken(user), TOKEN_TYPE, jwtService.getExpirationSeconds());
+        token, TOKEN_TYPE, jwtService.getExpirationSeconds(), jwtService.extractRole(token));
   }
 }

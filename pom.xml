@@ -188,6 +188,7 @@
 							<schemaMappings>
 								<schemaMapping>CourseLevel=com.teletubbies.course.course.CourseLevelType</schemaMapping>
 								<schemaMapping>CourseCategory=com.teletubbies.course.course.CourseCategoryType</schemaMapping>
+								<schemaMapping>InstructorRole=com.teletubbies.course.instructor.InstructorRoleType</schemaMapping>
 							</schemaMappings>
 							<configOptions>
 								<delegatePattern>false</delegatePattern>
