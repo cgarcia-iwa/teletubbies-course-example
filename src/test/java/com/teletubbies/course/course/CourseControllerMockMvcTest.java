@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -32,6 +33,9 @@ import com.teletubbies.course.model.NewCourseRequest;
 import com.teletubbies.course.model.UpdateCourseRequest;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -349,19 +353,45 @@ class CourseControllerMockMvcTest {
                       CourseLevelType.INTERMEDIATE,
                       instructor2);
 
-      when(courseService.getAll()).thenReturn(List.of(first, second));
+      Page<CourseResource> page = new PageImpl<>(List.of(first, second), PageRequest.of(0, 20), 2);
+      when(courseService.getAll(isNull(), isNull(), isNull(), isNull(), any())).thenReturn(page);
 
       mockMvc
               .perform(get(COURSES_URL))
               .andExpect(status().isOk())
               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-              .andExpect(jsonPath("$.courses.length()").value(2))
-              .andExpect(jsonPath("$.courses[0].id").value(first.getId()))
-              .andExpect(jsonPath("$.courses[0].name").value("Spring boot course"))
-              .andExpect(jsonPath("$.courses[1].id").value(second.getId()))
-              .andExpect(jsonPath("$.courses[1].name").value("Design basics"));
+              .andExpect(jsonPath("$.data.content.length()").value(2))
+              .andExpect(jsonPath("$.data.content[0].id").value(first.getId()))
+              .andExpect(jsonPath("$.data.content[0].name").value("Spring boot course"))
+              .andExpect(jsonPath("$.data.content[1].id").value(second.getId()))
+              .andExpect(jsonPath("$.data.content[1].name").value("Design basics"))
+              .andExpect(jsonPath("$.page.number").value(0))
+              .andExpect(jsonPath("$.page.size").value(20))
+              .andExpect(jsonPath("$.totalElements").value(2));
 
-      verify(courseService).getAll();
+      verify(courseService).getAll(isNull(), isNull(), isNull(), isNull(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    @WithMockUser(roles = "TEACHER")
+    @DisplayName("passes the query filters through to the service")
+    void getAllCourses_should_forward_filters_to_the_service() {
+      String instructorId = generateRandomId();
+      when(courseService.getAll(eq("Spring"), eq(CourseLevelType.BEGINNER), eq(CourseCategoryType.PROGRAMMING), eq(instructorId), any()))
+              .thenReturn(Page.empty());
+
+      mockMvc
+              .perform(
+                      get(COURSES_URL)
+                              .queryParam("name", "Spring")
+                              .queryParam("level", CourseLevelType.BEGINNER.toString())
+                              .queryParam("category", CourseCategoryType.PROGRAMMING.toString())
+                              .queryParam("instructorId", instructorId))
+              .andExpect(status().isOk());
+
+      verify(courseService)
+              .getAll(eq("Spring"), eq(CourseLevelType.BEGINNER), eq(CourseCategoryType.PROGRAMMING), eq(instructorId), any());
     }
   }
 

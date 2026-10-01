@@ -6,9 +6,10 @@ import com.teletubbies.course.model.CourseResource;
 import com.teletubbies.course.model.InstructorResource;
 import com.teletubbies.course.model.NewCourseRequest;
 import com.teletubbies.course.model.UpdateCourseRequest;
-import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,8 +29,29 @@ public class CourseService {
   }
 
   @Transactional(readOnly = true)
-  public List<CourseResource> getAll() {
-    return courseRepository.findAll().stream().map(this::toResource).toList();
+  public Page<CourseResource> getAll(
+      final String name,
+      final CourseLevelType level,
+      final CourseCategoryType category,
+      final String instructorId,
+      final Pageable pageable) {
+    final UUID instructorFilterId =
+        instructorId != null ? parseInstructorFilterId(instructorId) : null;
+    final Pageable safePageable = pageable != null ? pageable : Pageable.unpaged();
+    return courseRepository
+        .findAll(
+            CourseSpecification.findAllWithFilters(name, level, category, instructorFilterId),
+            safePageable)
+        .map(this::toResource);
+  }
+
+  private UUID parseInstructorFilterId(final String instructorId) {
+    try {
+      return UUID.fromString(instructorId);
+    } catch (final IllegalArgumentException e) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Invalid instructorId: " + instructorId);
+    }
   }
 
   @Transactional(readOnly = true)

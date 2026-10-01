@@ -142,18 +142,12 @@ components:
               course:
                 $ref: './resources.yaml#/components/schemas/CourseResource'
 
-    CoursesResponse:
-      description: Response containing a list of courses.
+    CoursesPageResponse:
+      description: Response containing paged courses.
       content:
         application/json:
           schema:
-            type: object
-            title: CoursesResponse
-            properties:
-              courses:
-                type: array
-                items:
-                  $ref: './resources.yaml#/components/schemas/CourseResource'
+            $ref: './resources.yaml#/components/schemas/CoursesPagedResources'
 
     InstructorResponse:
       description: Response containing a single instructor.
@@ -166,15 +160,9 @@ components:
               instructor:
                 $ref: './resources.yaml#/components/schemas/InstructorResource'
 
-    InstructorsResponse:
-      description: Response containing a list of instructors.
+    InstructorsPageResponse:
+      description: Response containing paged instructors.
       content:
         application/json:
           schema:
-            type: object
-            title: InstructorsResponse
-            properties:
-              instructors:
-                type: array
-                items:
-                  $ref: './resources.yaml#/components/schemas/InstructorResource'
+            $ref: './resources.yaml#/components/schemas/InstructorsPagedResources'

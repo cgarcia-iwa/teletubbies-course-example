@@ -68,3 +68,86 @@ components:
           minLength: 1
         role:
           $ref: 'enum.yaml#/components/schemas/InstructorRole'
+    PageResource:
+      required:
+        - number
+        - size
+      type: object
+      description: Page details.
+      properties:
+        number:
+          description: Current requested page.
+          type: integer
+          format: int32
+        size:
+          description: Number of items returned per page.
+          type: integer
+          format: int32
+
+    CoursesData:
+      required:
+        - content
+        - size
+      type: object
+      description: Wrapper containing the course list and its size.
+      properties:
+        content:
+          description: List of courses for the requested page.
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseResource'
+        size:
+          description: Number of items included in the content list.
+          type: integer
+          format: int32
+
+    CoursesPagedResources:
+      required:
+        - data
+        - page
+        - totalElements
+      type: object
+      description: Paginated courses response.
+      properties:
+        data:
+          $ref: '#/components/schemas/CoursesData'
+        page:
+          $ref: '#/components/schemas/PageResource'
+        totalElements:
+          type: integer
+          format: int64
+          description: Total elements without pagination.
+
+    InstructorsData:
+      required:
+        - content
+        - size
+      type: object
+      description: Wrapper containing the instructor list and its size.
+      properties:
+        content:
+          description: List of instructors for the requested page.
+          type: array
+          items:
+            $ref: '#/components/schemas/InstructorResource'
+        size:
+          description: Number of items included in the content list.
+          type: integer
+          format: int32
+
+    InstructorsPagedResources:
+      required:
+        - data
+        - page
+        - totalElements
+      type: object
+      description: Paginated instructors response.
+      properties:
+        data:
+          $ref: '#/components/schemas/InstructorsData'
+        page:
+          $ref: '#/components/schemas/PageResource'
+        totalElements:
+          type: integer
+          format: int64
+          description: Total elements without pagination.

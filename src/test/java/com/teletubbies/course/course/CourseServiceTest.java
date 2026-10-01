@@ -3,6 +3,7 @@ package com.teletubbies.course.course;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -20,6 +21,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -121,27 +127,60 @@ class CourseServiceTest {
     @DisplayName("maps every course together with its instructor")
     void getAll_should_mapEveryCourseWithItsInstructor_when_coursesExist() {
       // GIVEN
-      when(courseRepository.findAll())
-              .thenReturn(List.of(buildCourseEntity(COURSE), buildCourseEntity(OTHER_COURSE)));
+      final Pageable pageable = PageRequest.of(0, 20);
+      when(courseRepository.findAll(any(Specification.class), eq(pageable)))
+              .thenReturn(
+                      new PageImpl<>(
+                              List.of(buildCourseEntity(COURSE), buildCourseEntity(OTHER_COURSE)), pageable, 2));
 
       // WHEN
-      final List<CourseResource> result = courseService.getAll();
+      final Page<CourseResource> result =
+              courseService.getAll(null, null, null, null, pageable);
 
       // THEN
-      assertThat(result).containsExactly(buildCourseResource(COURSE), buildCourseResource(OTHER_COURSE));
-      verify(courseRepository).findAll();
+      assertThat(result.getContent())
+              .containsExactly(buildCourseResource(COURSE), buildCourseResource(OTHER_COURSE));
+      verify(courseRepository).findAll(any(Specification.class), eq(pageable));
       verifyNoMoreInteractions(courseRepository);
       verifyNoInteractions(instructorRepository);
     }
 
     @Test
-    @DisplayName("returns an empty list when there are no courses")
-    void getAll_should_returnAnEmptyList_when_thereAreNoCourses() {
+    @DisplayName("returns an empty page when there are no courses")
+    void getAll_should_returnAnEmptyPage_when_thereAreNoCourses() {
       // GIVEN
-      when(courseRepository.findAll()).thenReturn(List.of());
+      final Pageable pageable = PageRequest.of(0, 20);
+      when(courseRepository.findAll(any(Specification.class), eq(pageable)))
+              .thenReturn(Page.empty(pageable));
 
       // WHEN / THEN
-      assertThat(courseService.getAll()).isEmpty();
+      assertThat(courseService.getAll(null, null, null, null, pageable)).isEmpty();
+      verifyNoInteractions(instructorRepository);
+    }
+
+    @Test
+    @DisplayName("falls back to an unpaged request when pageable is null")
+    void getAll_should_useUnpagedRequest_when_pageableIsNull() {
+      // GIVEN
+      when(courseRepository.findAll(any(Specification.class), eq(Pageable.unpaged())))
+              .thenReturn(Page.empty());
+
+      // WHEN
+      courseService.getAll(null, null, null, null, null);
+
+      // THEN
+      verify(courseRepository).findAll(any(Specification.class), eq(Pageable.unpaged()));
+    }
+
+    @Test
+    @DisplayName("throws 400 when the instructorId filter is not a valid UUID")
+    void getAll_should_throwBadRequest_when_instructorIdFilterIsNotAUuid() {
+      // WHEN / THEN
+      assertFailsWith(
+              () -> courseService.getAll(null, null, null, "not-a-uuid", PageRequest.of(0, 20)),
+              HttpStatus.BAD_REQUEST,
+              "Invalid instructorId: not-a-uuid");
+      verifyNoInteractions(courseRepository);
       verifyNoInteractions(instructorRepository);
     }
   }

@@ -4,11 +4,12 @@ import com.teletubbies.course.course.CourseRepository;
 import com.teletubbies.course.model.InstructorResource;
 import com.teletubbies.course.model.NewInstructorRequest;
 import com.teletubbies.course.model.UpdateInstructorRequest;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,8 +25,15 @@ public class InstructorService {
   private final PasswordEncoder passwordEncoder;
 
   @Transactional(readOnly = true)
-  public List<InstructorResource> getAll() {
-    return instructorRepository.findAll().stream().map(this::toResource).toList();
+  public Page<InstructorResource> getAll(
+      final String fullName,
+      final String email,
+      final InstructorRoleType role,
+      final Pageable pageable) {
+    final Pageable safePageable = pageable != null ? pageable : Pageable.unpaged();
+    return instructorRepository
+        .findAll(InstructorSpecification.findAllWithFilters(fullName, email, role), safePageable)
+        .map(this::toResource);
   }
 
   @Transactional(readOnly = true)

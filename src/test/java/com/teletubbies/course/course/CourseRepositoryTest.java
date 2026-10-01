@@ -30,7 +30,8 @@ class CourseRepositoryTest extends BaseRepositoryTest {
     // THEN
     assertThat(courses)
         .extracting(CourseEntity::getName)
-        .containsExactlyInAnyOrder("Introduction to Spring Boot", "UI Design with Figma");
+        .containsExactlyInAnyOrder(
+            "Introduction to Spring Boot", "UI Design with Figma", "Advanced Data Science");
   }
 
   static Stream<Arguments> findById_data_provider() {

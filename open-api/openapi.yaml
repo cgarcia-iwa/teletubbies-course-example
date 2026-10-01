@@ -63,11 +63,22 @@ paths:
         - courses
       summary: Get all courses
       description: |
-        This endpoint retrieves the full list of registered courses.
+        This endpoint retrieves a paginated list of courses with optional filters by name, level,
+        category and instructor.
       operationId: getAllCourses
+      parameters:
+        - name: pageable
+          in: query
+          required: false
+          schema:
+            $ref: './parameters.yaml#/components/parameters/Pageable'
+        - $ref: 'parameters.yaml#/components/parameters/CourseNameFilter'
+        - $ref: 'parameters.yaml#/components/parameters/CourseLevelFilter'
+        - $ref: 'parameters.yaml#/components/parameters/CourseCategoryFilter'
+        - $ref: 'parameters.yaml#/components/parameters/CourseInstructorIdFilter'
       responses:
         200:
-          $ref: 'responses.yaml#/components/responses/CoursesResponse'
+          $ref: 'responses.yaml#/components/responses/CoursesPageResponse'
         401:
           $ref: 'responses.yaml#/components/responses/Unauthorized'
         403:
@@ -193,11 +204,21 @@ paths:
         - instructors
       summary: Get all instructors
       description: |
-        This endpoint retrieves the full list of registered instructors.
+        This endpoint retrieves a paginated list of instructors with optional filters by full
+        name, email and role.
       operationId: getAllInstructors
+      parameters:
+        - name: pageable
+          in: query
+          required: false
+          schema:
+            $ref: './parameters.yaml#/components/parameters/Pageable'
+        - $ref: 'parameters.yaml#/components/parameters/InstructorFullNameFilter'
+        - $ref: 'parameters.yaml#/components/parameters/InstructorEmailFilter'
+        - $ref: 'parameters.yaml#/components/parameters/InstructorRoleFilter'
       responses:
         200:
-          $ref: 'responses.yaml#/components/responses/InstructorsResponse'
+          $ref: 'responses.yaml#/components/responses/InstructorsPageResponse'
         401:
           $ref: 'responses.yaml#/components/responses/Unauthorized'
         403:

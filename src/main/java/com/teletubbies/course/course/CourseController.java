@@ -1,10 +1,15 @@
 package com.teletubbies.course.course;
 
 import com.teletubbies.course.CoursesApi;
+import com.teletubbies.course.model.CourseResource;
 import com.teletubbies.course.model.CourseResponse;
-import com.teletubbies.course.model.CoursesResponse;
+import com.teletubbies.course.model.CoursesData;
+import com.teletubbies.course.model.CoursesPagedResources;
 import com.teletubbies.course.model.NewCourseRequest;
+import com.teletubbies.course.model.PageResource;
 import com.teletubbies.course.model.UpdateCourseRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,8 +34,25 @@ public class CourseController implements CoursesApi {
 
   @Override
   @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'TEACHER')")
-  public ResponseEntity<CoursesResponse> getAllCourses() {
-    return ResponseEntity.ok(CoursesResponse.builder().courses(courseService.getAll()).build());
+  public ResponseEntity<CoursesPagedResources> getAllCourses(
+      final Pageable pageable,
+      final String name,
+      final CourseLevelType level,
+      final CourseCategoryType category,
+      final String instructorId) {
+    final Page<CourseResource> page =
+        courseService.getAll(name, level, category, instructorId, pageable);
+
+    return ResponseEntity.ok(
+        CoursesPagedResources.builder()
+            .data(
+                CoursesData.builder()
+                    .content(page.getContent())
+                    .size(page.getNumberOfElements())
+                    .build())
+            .page(PageResource.builder().number(page.getNumber()).size(page.getSize()).build())
+            .totalElements(page.getTotalElements())
+            .build());
   }
 
   @Override

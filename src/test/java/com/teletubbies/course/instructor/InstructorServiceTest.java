@@ -3,6 +3,7 @@ package com.teletubbies.course.instructor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -17,6 +18,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -97,26 +103,45 @@ class InstructorServiceTest {
         @Test
         @DisplayName("maps every instructor together with its role")
         void getAll_should_map_every_instructor_with_its_role() {
-            when(instructorRepository.findAll())
+            final Pageable pageable = PageRequest.of(0, 20);
+            when(instructorRepository.findAll(any(Specification.class), eq(pageable)))
                     .thenReturn(
-                            List.of(buildInstructorEntity(INSTRUCTOR), buildInstructorEntity(OTHER_INSTRUCTOR)));
+                            new PageImpl<>(
+                                    List.of(buildInstructorEntity(INSTRUCTOR), buildInstructorEntity(OTHER_INSTRUCTOR)),
+                                    pageable,
+                                    2));
 
-            final List<InstructorResource> result = instructorService.getAll();
+            final Page<InstructorResource> result =
+                    instructorService.getAll(null, null, null, pageable);
 
-            assertThat(result)
+            assertThat(result.getContent())
                     .containsExactly(
                             buildInstructorResource(INSTRUCTOR), buildInstructorResource(OTHER_INSTRUCTOR));
         }
 
         @Test
-        @DisplayName("returns an empty list without touching courses or the password encoder")
-        void getAll_should_return_empty_list_without_touching_other_collaborators() {
-            when(instructorRepository.findAll()).thenReturn(List.of());
+        @DisplayName("returns an empty page without touching courses or the password encoder")
+        void getAll_should_return_empty_page_without_touching_other_collaborators() {
+            final Pageable pageable = PageRequest.of(0, 20);
+            when(instructorRepository.findAll(any(Specification.class), eq(pageable)))
+                    .thenReturn(Page.empty(pageable));
 
-            final List<InstructorResource> result = instructorService.getAll();
+            final Page<InstructorResource> result =
+                    instructorService.getAll(null, null, null, pageable);
 
             assertThat(result).isEmpty();
             verifyNoInteractions(courseRepository, passwordEncoder);
+        }
+
+        @Test
+        @DisplayName("falls back to an unpaged request when pageable is null")
+        void getAll_should_useUnpagedRequest_when_pageableIsNull() {
+            when(instructorRepository.findAll(any(Specification.class), eq(Pageable.unpaged())))
+                    .thenReturn(Page.empty());
+
+            instructorService.getAll(null, null, null, null);
+
+            verify(instructorRepository).findAll(any(Specification.class), eq(Pageable.unpaged()));
         }
     }
 

@@ -6,6 +6,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -32,6 +34,9 @@ import com.teletubbies.course.model.UpdateInstructorRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -311,28 +316,52 @@ class InstructorControllerMockMvcTest {
         void getAllInstructors_should_return_200_with_both_instructors_in_order() {
             final String firstId = generateRandomId();
             final String secondId = generateRandomId();
-            when(instructorService.getAll())
-                    .thenReturn(
+            Page<InstructorResource> page =
+                    new PageImpl<>(
                             List.of(
                                     buildInstructor(firstId, FULL_NAME, EMAIL, InstructorRoleType.TEACHER),
                                     buildInstructor(
                                             secondId,
                                             "Po-Po",
                                             "popo@teletubbies.test",
-                                            InstructorRoleType.ADMINISTRATOR)));
+                                            InstructorRoleType.ADMINISTRATOR)),
+                            PageRequest.of(0, 20),
+                            2);
+            when(instructorService.getAll(isNull(), isNull(), isNull(), any())).thenReturn(page);
 
             mockMvc
                     .perform(get(INSTRUCTORS_URL))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.instructors", hasSize(2)))
-                    .andExpect(jsonPath("$.instructors[0].id").value(firstId))
-                    .andExpect(jsonPath("$.instructors[0].fullName").value(FULL_NAME))
-                    .andExpect(jsonPath("$.instructors[0].email").value(EMAIL))
-                    .andExpect(jsonPath("$.instructors[0].role").value("TEACHER"))
-                    .andExpect(jsonPath("$.instructors[1].id").value(secondId))
-                    .andExpect(jsonPath("$.instructors[1].fullName").value("Po-Po"))
-                    .andExpect(jsonPath("$.instructors[1].email").value("popo@teletubbies.test"))
-                    .andExpect(jsonPath("$.instructors[1].role").value("ADMINISTRATOR"));
+                    .andExpect(jsonPath("$.data.content", hasSize(2)))
+                    .andExpect(jsonPath("$.data.content[0].id").value(firstId))
+                    .andExpect(jsonPath("$.data.content[0].fullName").value(FULL_NAME))
+                    .andExpect(jsonPath("$.data.content[0].email").value(EMAIL))
+                    .andExpect(jsonPath("$.data.content[0].role").value("TEACHER"))
+                    .andExpect(jsonPath("$.data.content[1].id").value(secondId))
+                    .andExpect(jsonPath("$.data.content[1].fullName").value("Po-Po"))
+                    .andExpect(jsonPath("$.data.content[1].email").value("popo@teletubbies.test"))
+                    .andExpect(jsonPath("$.data.content[1].role").value("ADMINISTRATOR"))
+                    .andExpect(jsonPath("$.totalElements").value(2));
+        }
+
+        @SneakyThrows
+        @Test
+        @WithMockUser(roles = "TEACHER")
+        @DisplayName("passes the query filters through to the service")
+        void getAllInstructors_should_forward_filters_to_the_service() {
+            when(instructorService.getAll(eq("Laa"), eq("teletubbies"), eq(InstructorRoleType.TEACHER), any()))
+                    .thenReturn(Page.empty());
+
+            mockMvc
+                    .perform(
+                            get(INSTRUCTORS_URL)
+                                    .queryParam("fullName", "Laa")
+                                    .queryParam("email", "teletubbies")
+                                    .queryParam("role", InstructorRoleType.TEACHER.toString()))
+                    .andExpect(status().isOk());
+
+            verify(instructorService)
+                    .getAll(eq("Laa"), eq("teletubbies"), eq(InstructorRoleType.TEACHER), any());
         }
     }
 

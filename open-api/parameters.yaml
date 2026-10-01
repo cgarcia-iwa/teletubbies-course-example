@@ -16,3 +16,82 @@ components:
       required: true
       schema:
         type: string
+
+    Pageable:
+      type: object
+      description: Properties with which the request can be paginated.
+      properties:
+        page:
+          description: The number of pages to receive per request, the default value is 0.
+          type: integer
+          default: 0
+          format: int32
+        size:
+          description: The maximum amount of items to receive per request, the default value is 20.
+          type: integer
+          default: 20
+          format: int32
+
+    CourseNameFilter:
+      name: name
+      in: query
+      description: Filter courses by name (partial match, case-insensitive).
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 100
+
+    CourseLevelFilter:
+      name: level
+      in: query
+      description: Filter courses by level (optional).
+      required: false
+      schema:
+        $ref: './enum.yaml#/components/schemas/CourseLevel'
+
+    CourseCategoryFilter:
+      name: category
+      in: query
+      description: Filter courses by category (optional).
+      required: false
+      schema:
+        $ref: './enum.yaml#/components/schemas/CourseCategory'
+
+    CourseInstructorIdFilter:
+      name: instructorId
+      in: query
+      description: Filter courses by the instructor assigned to teach them.
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 36
+
+    InstructorFullNameFilter:
+      name: fullName
+      in: query
+      description: Filter instructors by full name (partial match, case-insensitive).
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 150
+
+    InstructorEmailFilter:
+      name: email
+      in: query
+      description: Filter instructors by email (partial match, case-insensitive).
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 150
+
+    InstructorRoleFilter:
+      name: role
+      in: query
+      description: Filter instructors by role (optional).
+      required: false
+      schema:
+        $ref: './enum.yaml#/components/schemas/InstructorRole'

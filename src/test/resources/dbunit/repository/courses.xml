@@ -3,7 +3,14 @@
 	<instructor
 		id="00000000-0000-0000-0000-000000000001"
 		full_name="Laa-Laa"
-		email="laalaa@teletubbies.test" />
+		email="laalaa@teletubbies.test"
+		role="2" />
+
+	<instructor
+		id="00000000-0000-0000-0000-000000000002"
+		full_name="Po-Po"
+		email="popo@teletubbies.test"
+		role="1" />
 
 	<course
 		id="00000000-0000-0000-0000-000000000101"
@@ -22,4 +29,13 @@
 		level="2"
 		category="2"
 		instructor_id="00000000-0000-0000-0000-000000000001" />
+
+	<course
+		id="00000000-0000-0000-0000-000000000103"
+		name="Advanced Data Science"
+		description="Statistics and machine learning for working engineers."
+		duration="20"
+		level="3"
+		category="5"
+		instructor_id="00000000-0000-0000-0000-000000000002" />
 </dataset>
