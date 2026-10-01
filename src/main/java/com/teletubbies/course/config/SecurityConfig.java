@@ -1,5 +1,6 @@
 package com.teletubbies.course.config;
 
+import com.teletubbies.course.exception.ProblemDetailAuthenticationEntryPoint;
 import com.teletubbies.course.security.JwtAuthenticationFilter;
 import com.teletubbies.course.security.JwtProperties;
 import com.teletubbies.course.security.JwtService;
@@ -7,7 +8,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -20,7 +20,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -33,7 +32,8 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(
       final HttpSecurity http,
       final JwtService jwtService,
-      final UserDetailsService userDetailsService)
+      final UserDetailsService userDetailsService,
+      final ProblemDetailAuthenticationEntryPoint authenticationEntryPoint)
       throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(
@@ -46,8 +46,7 @@ public class SecurityConfig {
                     .requestMatchers("/error").permitAll()
                     .anyRequest()
                     .authenticated())
-        .exceptionHandling(
-            ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+        .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
         .addFilterBefore(
             new JwtAuthenticationFilter(jwtService, userDetailsService),
             UsernamePasswordAuthenticationFilter.class);
