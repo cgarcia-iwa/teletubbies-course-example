@@ -68,6 +68,9 @@ class CourseControllerMockMvcTest {
   private static final String TRACE_ID_REGEX =
           "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 
+  private static final String COURSES_URL = "/courses";
+  private static final String COURSE_URL = "/courses/{courseId}";
+
   @Autowired private MockMvc mockMvc;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
@@ -145,7 +148,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("creates the course and returns 201 with the created course")
-    void createsAndReturnsTheCourse() {
+    void createCourse_should_return_201_with_the_created_course() {
       String instructorId = generateRandomId();
       NewCourseRequest request = buildNewCourseRequestBuilder(instructorId).build();
 
@@ -164,7 +167,7 @@ class CourseControllerMockMvcTest {
 
       mockMvc
               .perform(
-                      post("/courses")
+                      post(COURSES_URL)
                               .with(csrf())
                               .content(objectMapper.writeValueAsString(request))
                               .contentType(MediaType.APPLICATION_JSON))
@@ -186,7 +189,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("returns 409 when a course with that name already exists")
-    void returnsConflictWhenNameAlreadyExists() {
+    void createCourse_should_return_409_when_name_already_exists() {
       NewCourseRequest request = buildNewCourseRequestBuilder(generateRandomId()).build();
 
       when(courseService.create(any(NewCourseRequest.class)))
@@ -194,12 +197,12 @@ class CourseControllerMockMvcTest {
 
       mockMvc
               .perform(
-                      post("/courses")
+                      post(COURSES_URL)
                               .with(csrf())
                               .content(objectMapper.writeValueAsString(request))
                               .contentType(MediaType.APPLICATION_JSON))
               .andExpect(status().isConflict())
-              .andExpect(expectProblemDetail(HttpStatus.CONFLICT, "conflict", "/courses"))
+              .andExpect(expectProblemDetail(HttpStatus.CONFLICT, "conflict", COURSES_URL))
               .andExpect(jsonPath("$.detail").value("Course name already exists"));
     }
 
@@ -207,7 +210,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("returns 404 when the given instructor does not exist")
-    void returnsNotFoundWhenInstructorDoesNotExist() {
+    void createCourse_should_return_404_when_instructor_does_not_exist() {
       String instructorId = generateRandomId();
       NewCourseRequest request = buildNewCourseRequestBuilder(instructorId).build();
 
@@ -218,12 +221,12 @@ class CourseControllerMockMvcTest {
 
       mockMvc
               .perform(
-                      post("/courses")
+                      post(COURSES_URL)
                               .with(csrf())
                               .content(objectMapper.writeValueAsString(request))
                               .contentType(MediaType.APPLICATION_JSON))
               .andExpect(status().isNotFound())
-              .andExpect(expectProblemDetail(HttpStatus.NOT_FOUND, "not-found", "/courses"))
+              .andExpect(expectProblemDetail(HttpStatus.NOT_FOUND, "not-found", COURSES_URL))
               .andExpect(jsonPath("$.detail").value("Instructor not found: " + instructorId));
 
       verify(courseService).create(any(NewCourseRequest.class));
@@ -233,7 +236,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("returns 400 with one error entry per violated validation rule")
-    void returnsBadRequestWithOneErrorPerBrokenRule() {
+    void createCourse_should_return_400_with_one_error_per_broken_rule() {
       // name and instructorId are left blank on purpose: each one breaks two rules
       // (must not be blank + size range), so we expect 4 errors total, not 2
       // (one per field).
@@ -248,12 +251,12 @@ class CourseControllerMockMvcTest {
 
       mockMvc
               .perform(
-                      post("/courses")
+                      post(COURSES_URL)
                               .with(csrf())
                               .content(objectMapper.writeValueAsString(request))
                               .contentType(MediaType.APPLICATION_JSON))
               .andExpect(status().isBadRequest())
-              .andExpect(expectValidationProblemDetail(HttpStatus.BAD_REQUEST, "bad-request", "/courses"))
+              .andExpect(expectValidationProblemDetail(HttpStatus.BAD_REQUEST, "bad-request", COURSES_URL))
               .andExpect(jsonPath("$.errors.length()").value(4))
               .andExpect(
                       jsonPath(
@@ -271,7 +274,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("returns 400 when the name exceeds the maximum length")
-    void returnsBadRequestWhenNameIsTooLong() {
+    void createCourse_should_return_400_when_name_is_too_long() {
       NewCourseRequest request =
               buildNewCourseRequestBuilder(generateRandomId())
                       .name("a".repeat(101)) // NewCourseRequest.name is limited to 100 characters
@@ -279,12 +282,12 @@ class CourseControllerMockMvcTest {
 
       mockMvc
               .perform(
-                      post("/courses")
+                      post(COURSES_URL)
                               .with(csrf())
                               .content(objectMapper.writeValueAsString(request))
                               .contentType(MediaType.APPLICATION_JSON))
               .andExpect(status().isBadRequest())
-              .andExpect(expectValidationProblemDetail(HttpStatus.BAD_REQUEST, "bad-request", "/courses"))
+              .andExpect(expectValidationProblemDetail(HttpStatus.BAD_REQUEST, "bad-request", COURSES_URL))
               .andExpect(jsonPath("$.errors.length()").value(1))
               .andExpect(jsonPath("$.errors[0].field").value("name"))
               .andExpect(jsonPath("$.errors[0].message").value("size must be between 1 and 100"));
@@ -296,15 +299,15 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("returns 400 when the request body is not valid JSON")
-    void returnsBadRequestWhenBodyIsMalformed() {
+    void createCourse_should_return_400_when_body_is_malformed() {
       mockMvc
               .perform(
-                      post("/courses")
+                      post(COURSES_URL)
                               .with(csrf())
                               .content("{\"name\": ")
                               .contentType(MediaType.APPLICATION_JSON))
               .andExpect(status().isBadRequest())
-              .andExpect(expectProblemDetail(HttpStatus.BAD_REQUEST, "bad-request", "/courses"));
+              .andExpect(expectProblemDetail(HttpStatus.BAD_REQUEST, "bad-request", COURSES_URL));
     }
   }
 
@@ -320,7 +323,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "TEACHER")
     @DisplayName("returns 200 with every existing course")
-    void returnsAllCourses() {
+    void getAllCourses_should_return_200_with_every_course() {
       InstructorResource instructor1 =
               buildInstructor(generateRandomId(), "Instructor One", "one@example.com");
       InstructorResource instructor2 =
@@ -349,7 +352,7 @@ class CourseControllerMockMvcTest {
       when(courseService.getAll()).thenReturn(List.of(first, second));
 
       mockMvc
-              .perform(get("/courses"))
+              .perform(get(COURSES_URL))
               .andExpect(status().isOk())
               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
               .andExpect(jsonPath("$.courses.length()").value(2))
@@ -374,7 +377,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "TEACHER")
     @DisplayName("returns 200 with the requested course")
-    void returnsTheCourse() {
+    void getCourse_should_return_200_with_the_requested_course() {
       String courseId = generateRandomId();
       InstructorResource instructor = buildTestInstructor(generateRandomId());
       CourseResource expected =
@@ -390,7 +393,7 @@ class CourseControllerMockMvcTest {
       when(courseService.getById(courseId)).thenReturn(expected);
 
       mockMvc
-              .perform(get("/courses/{courseId}", courseId))
+              .perform(get(COURSE_URL, courseId))
               .andExpect(status().isOk())
               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
               .andExpect(jsonPath("$.course.id").value(courseId))
@@ -403,14 +406,14 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "TEACHER")
     @DisplayName("returns 404 when the course does not exist")
-    void returnsNotFoundWhenCourseDoesNotExist() {
+    void getCourse_should_return_404_when_course_does_not_exist() {
       String courseId = generateRandomId();
 
       when(courseService.getById(courseId))
               .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found: " + courseId));
 
       mockMvc
-              .perform(get("/courses/{courseId}", courseId))
+              .perform(get(COURSE_URL, courseId))
               .andExpect(status().isNotFound())
               .andExpect(expectProblemDetail(HttpStatus.NOT_FOUND, "not-found", "/courses/" + courseId))
               .andExpect(jsonPath("$.detail").value("Course not found: " + courseId));
@@ -420,14 +423,14 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "TEACHER")
     @DisplayName("returns 403 when the user is not allowed to access the course")
-    void returnsForbiddenWhenAccessIsDenied() {
+    void getCourse_should_return_403_when_access_is_denied() {
       String courseId = generateRandomId();
 
       when(courseService.getById(courseId))
               .thenThrow(new AccessDeniedException("Not the owner of the course"));
 
       mockMvc
-              .perform(get("/courses/{courseId}", courseId))
+              .perform(get(COURSE_URL, courseId))
               .andExpect(status().isForbidden())
               .andExpect(expectProblemDetail(HttpStatus.FORBIDDEN, "forbidden", "/courses/" + courseId));
     }
@@ -445,7 +448,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("updates the course and returns 200 with the new data")
-    void updatesAndReturnsTheCourse() {
+    void updateCourse_should_return_200_with_the_new_data() {
       String courseId = generateRandomId();
       String instructorId = generateRandomId();
       InstructorResource instructor = buildTestInstructor(instructorId);
@@ -466,7 +469,7 @@ class CourseControllerMockMvcTest {
 
       mockMvc
               .perform(
-                      put("/courses/{courseId}", courseId)
+                      put(COURSE_URL, courseId)
                               .with(csrf())
                               .content(objectMapper.writeValueAsString(request))
                               .contentType(MediaType.APPLICATION_JSON))
@@ -485,7 +488,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("returns 400 when instructorId is not a valid format")
-    void returnsBadRequestWhenInstructorIdIsInvalid() {
+    void updateCourse_should_return_400_when_instructor_id_is_invalid() {
       String courseId = generateRandomId();
       UpdateCourseRequest request = buildUpdateCourseRequestBuilder("not-a-uuid").build();
 
@@ -495,7 +498,7 @@ class CourseControllerMockMvcTest {
 
       mockMvc
               .perform(
-                      put("/courses/{courseId}", courseId)
+                      put(COURSE_URL, courseId)
                               .with(csrf())
                               .content(objectMapper.writeValueAsString(request))
                               .contentType(MediaType.APPLICATION_JSON))
@@ -508,7 +511,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("returns 404 when the given instructor does not exist")
-    void returnsNotFoundWhenInstructorDoesNotExist() {
+    void updateCourse_should_return_404_when_instructor_does_not_exist() {
       String courseId = generateRandomId();
       String instructorId = generateRandomId();
       UpdateCourseRequest request = buildUpdateCourseRequestBuilder(instructorId).build();
@@ -520,7 +523,7 @@ class CourseControllerMockMvcTest {
 
       mockMvc
               .perform(
-                      put("/courses/{courseId}", courseId)
+                      put(COURSE_URL, courseId)
                               .with(csrf())
                               .content(objectMapper.writeValueAsString(request))
                               .contentType(MediaType.APPLICATION_JSON))
@@ -542,13 +545,13 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("deletes the course and returns 204")
-    void deletesTheCourse() {
+    void deleteCourse_should_return_204() {
       String courseId = generateRandomId();
 
       doNothing().when(courseService).delete(courseId);
 
       mockMvc
-              .perform(delete("/courses/{courseId}", courseId).with(csrf()))
+              .perform(delete(COURSE_URL, courseId).with(csrf()))
               .andExpect(status().isNoContent());
 
       verify(courseService).delete(courseId);
@@ -558,7 +561,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("returns 500 without leaking the internal error message on an unexpected failure")
-    void returnsInternalServerErrorWithoutLeakingTheInternalMessage() {
+    void deleteCourse_should_return_500_without_leaking_the_internal_message() {
       String courseId = generateRandomId();
 
       doThrow(new IllegalStateException("Connection to the database was lost"))
@@ -566,7 +569,7 @@ class CourseControllerMockMvcTest {
               .delete(courseId);
 
       mockMvc
-              .perform(delete("/courses/{courseId}", courseId).with(csrf()))
+              .perform(delete(COURSE_URL, courseId).with(csrf()))
               .andExpect(status().isInternalServerError())
               .andExpect(
                       expectProblemDetail(
@@ -590,7 +593,7 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "TEACHER")
     @DisplayName("returns 404 when the route does not exist")
-    void returnsNotFoundForUnmappedPath() {
+    void unmappedPath_should_return_404() {
       mockMvc
               .perform(get("/not-mapped"))
               .andExpect(status().isNotFound())
@@ -601,11 +604,11 @@ class CourseControllerMockMvcTest {
     @Test
     @WithMockUser(roles = "ADMINISTRATOR")
     @DisplayName("returns 405 when the HTTP method is not supported on that route")
-    void returnsMethodNotAllowedForUnsupportedHttpMethod() {
+    void patchCourse_should_return_405() {
       String courseId = generateRandomId();
 
       mockMvc
-              .perform(patch("/courses/{courseId}", courseId).with(csrf()))
+              .perform(patch(COURSE_URL, courseId).with(csrf()))
               .andExpect(status().isMethodNotAllowed())
               .andExpect(
                       expectProblemDetail(
@@ -661,4 +664,3 @@ class CourseControllerMockMvcTest {
     return json;
   }
 }
-

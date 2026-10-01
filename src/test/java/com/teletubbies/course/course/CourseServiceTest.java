@@ -119,7 +119,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("maps every course together with its instructor")
-    void mapsEveryCourseWithItsInstructor() {
+    void getAll_should_mapEveryCourseWithItsInstructor_when_coursesExist() {
       // GIVEN
       when(courseRepository.findAll())
               .thenReturn(List.of(buildCourseEntity(COURSE), buildCourseEntity(OTHER_COURSE)));
@@ -136,7 +136,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("returns an empty list when there are no courses")
-    void returnsAnEmptyListWhenThereAreNoCourses() {
+    void getAll_should_returnAnEmptyList_when_thereAreNoCourses() {
       // GIVEN
       when(courseRepository.findAll()).thenReturn(List.of());
 
@@ -156,7 +156,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("returns the course together with its instructor")
-    void returnsTheCourseWithItsInstructor() {
+    void getById_should_returnTheCourseWithItsInstructor_when_courseExists() {
       // GIVEN
       when(courseRepository.findById(any(UUID.class)))
               .thenReturn(Optional.of(buildCourseEntity(COURSE)));
@@ -174,7 +174,7 @@ class CourseServiceTest {
     @ParameterizedTest
     @MethodSource("com.teletubbies.course.course.CourseServiceTest#provideUnparsableCourseIds")
     @DisplayName("throws 404 when the id is not a valid UUID")
-    void throwsNotFoundWhenIdIsNotAUuid(final String testCase, final String courseId) {
+    void getById_should_throwNotFound_when_idIsNotAUuid(final String testCase, final String courseId) {
       // WHEN / THEN
       assertFailsWith(
               testCase,
@@ -187,7 +187,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("throws 404 when the course does not exist")
-    void throwsNotFoundWhenCourseDoesNotExist() {
+    void getById_should_throwNotFound_when_courseDoesNotExist() {
       // GIVEN
       when(courseRepository.findById(COURSE.id())).thenReturn(Optional.empty());
 
@@ -214,7 +214,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("persists the course with the instructor it was given")
-    void persistsTheCourseWithTheInstructorItWasGiven() {
+    void create_should_persistCourseWithGivenInstructor_when_requestIsValid() {
       // GIVEN
       final NewCourseRequest request = buildNewCourseRequest(COURSE);
       final InstructorEntity instructor = buildInstructorEntity(COURSE.instructor());
@@ -265,7 +265,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("throws 409 when the name already exists")
-    void throwsConflictWhenNameAlreadyExists() {
+    void create_should_throwConflict_when_nameAlreadyExists() {
       // GIVEN
       when(courseRepository.existsByName(COURSE.name())).thenReturn(true);
 
@@ -284,7 +284,7 @@ class CourseServiceTest {
     @ParameterizedTest
     @MethodSource("com.teletubbies.course.course.CourseServiceTest#provideInvalidInstructorIds")
     @DisplayName("throws 400 when the instructor id is not a valid UUID")
-    void throwsBadRequestWhenInstructorIdIsNotAUuid(final String testCase, final String instructorId) {
+    void create_should_throwBadRequest_when_instructorIdIsNotAUuid(final String testCase, final String instructorId) {
       // GIVEN
       when(courseRepository.existsByName(COURSE.name())).thenReturn(false);
 
@@ -300,7 +300,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("throws 404 when the instructor does not exist")
-    void throwsNotFoundWhenInstructorDoesNotExist() {
+    void create_should_throwNotFound_when_instructorDoesNotExist() {
       // GIVEN
       when(courseRepository.existsByName(COURSE.name())).thenReturn(false);
       when(instructorRepository.findById(COURSE.instructor().id())).thenReturn(Optional.empty());
@@ -326,7 +326,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("applies every field and reassigns the instructor")
-    void appliesEveryFieldAndReassignsTheInstructor() {
+    void update_should_applyEveryFieldAndReassignInstructor_when_requestIsValid() {
       // GIVEN
       final CourseEntity course = buildCourseEntity(COURSE);
       final InstructorEntity newInstructor = buildInstructorEntity(UPDATED_COURSE.instructor());
@@ -356,7 +356,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("throws 409 when another course already uses the name")
-    void throwsConflictWhenAnotherCourseAlreadyUsesTheName() {
+    void update_should_throwConflict_when_anotherCourseAlreadyUsesTheName() {
       // GIVEN
       final CourseEntity course = buildCourseEntity(COURSE);
       final InstructorEntity instructor = course.getInstructor();
@@ -380,7 +380,7 @@ class CourseServiceTest {
     @ParameterizedTest
     @MethodSource("com.teletubbies.course.course.CourseServiceTest#provideInvalidInstructorIds")
     @DisplayName("throws 400 when the instructor id is not a valid UUID")
-    void throwsBadRequestWhenInstructorIdIsNotAUuid(final String testCase, final String instructorId) {
+    void update_should_throwBadRequest_when_instructorIdIsNotAUuid(final String testCase, final String instructorId) {
       // GIVEN
       when(courseRepository.findById(COURSE.id())).thenReturn(Optional.of(buildCourseEntity(COURSE)));
       when(courseRepository.existsByNameAndIdNot(UPDATED_COURSE.name(), COURSE.id())).thenReturn(false);
@@ -399,7 +399,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("throws 404 when the instructor does not exist")
-    void throwsNotFoundWhenInstructorDoesNotExist() {
+    void update_should_throwNotFound_when_instructorDoesNotExist() {
       // GIVEN
       when(courseRepository.findById(COURSE.id())).thenReturn(Optional.of(buildCourseEntity(COURSE)));
       when(courseRepository.existsByNameAndIdNot(UPDATED_COURSE.name(), COURSE.id())).thenReturn(false);
@@ -417,7 +417,7 @@ class CourseServiceTest {
     @ParameterizedTest
     @MethodSource("com.teletubbies.course.course.CourseServiceTest#provideUnparsableCourseIds")
     @DisplayName("throws 404 when the id is not a valid UUID")
-    void throwsNotFoundWhenIdIsNotAUuid(final String testCase, final String courseId) {
+    void update_should_throwNotFound_when_idIsNotAUuid(final String testCase, final String courseId) {
       // WHEN / THEN
       assertFailsWith(
               testCase,
@@ -430,7 +430,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("throws 404 when the course does not exist")
-    void throwsNotFoundWhenCourseDoesNotExist() {
+    void update_should_throwNotFound_when_courseDoesNotExist() {
       // GIVEN
       when(courseRepository.findById(COURSE.id())).thenReturn(Optional.empty());
 
@@ -455,7 +455,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("deletes the existing course")
-    void deletesTheExistingCourse() {
+    void delete_should_deleteTheExistingCourse_when_courseExists() {
       // GIVEN
       final CourseEntity course = buildCourseEntity(COURSE);
       when(courseRepository.findById(COURSE.id())).thenReturn(Optional.of(course));
@@ -473,7 +473,7 @@ class CourseServiceTest {
     @ParameterizedTest
     @MethodSource("com.teletubbies.course.course.CourseServiceTest#provideUnparsableCourseIds")
     @DisplayName("throws 404 when the id is not a valid UUID")
-    void throwsNotFoundWhenIdIsNotAUuid(final String testCase, final String courseId) {
+    void delete_should_throwNotFound_when_idIsNotAUuid(final String testCase, final String courseId) {
       // WHEN / THEN
       assertFailsWith(
               testCase,
@@ -486,7 +486,7 @@ class CourseServiceTest {
 
     @Test
     @DisplayName("throws 404 when the course does not exist")
-    void throwsNotFoundWhenCourseDoesNotExist() {
+    void delete_should_throwNotFound_when_courseDoesNotExist() {
       // GIVEN
       when(courseRepository.findById(COURSE.id())).thenReturn(Optional.empty());
 
@@ -574,7 +574,7 @@ class CourseServiceTest {
   private static CourseEntity buildCourseEntity(final CourseFixture fixture) {
     final CourseEntity course =
             new CourseEntity(buildNewCourseRequest(fixture), buildInstructorEntity(fixture.instructor()));
-    ReflectionTestUtils.setField(course, "id", fixture.id());
+    course.setId(fixture.id());
     return course;
   }
 
@@ -642,5 +642,3 @@ class CourseServiceTest {
             .build();
   }
 }
-
-
