@@ -16,11 +16,8 @@ import jakarta.persistence.UniqueConstraint;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+
+import lombok.*;
 
 @Entity
 @Table(
@@ -33,6 +30,7 @@ import lombok.ToString;
 public class CourseEntity implements Serializable {
   @Serial private static final long serialVersionUID = 1L;
 
+  @Setter // Used for test
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(nullable = false, unique = true)
@@ -54,6 +52,8 @@ public class CourseEntity implements Serializable {
   private CourseCategoryType category;
 
 
+  // Written by the service out of the resolved instructor: the association below is mapped read
+  // only, so this is the field Hibernate persists as the foreign key.
   @Column(name = "instructor_id", nullable = false)
   private UUID instructorId;
 
@@ -61,21 +61,23 @@ public class CourseEntity implements Serializable {
   @JoinColumn(name = "instructor_id", nullable = false, insertable = false, updatable = false)
   private InstructorEntity instructor;
 
-  public CourseEntity(final NewCourseRequest request) {
+  public CourseEntity(final NewCourseRequest request, final InstructorEntity instructor) {
     this.name = request.getName();
     this.description = request.getDescription();
     this.duration = request.getDuration().shortValue();
     this.level = request.getLevel();
     this.category = request.getCategory();
-    this.instructorId = UUID.fromString(request.getInstructorId());
+    this.instructor = instructor;
+    this.instructorId = instructor.getId();
   }
 
-  public void update(final UpdateCourseRequest request) {
+  public void update(final UpdateCourseRequest request, final InstructorEntity instructor) {
     this.name = request.getName();
     this.description = request.getDescription();
     this.duration = request.getDuration().shortValue();
     this.level = request.getLevel();
     this.category = request.getCategory();
-    this.instructorId = UUID.fromString(request.getInstructorId());
+    this.instructor = instructor;
+    this.instructorId = instructor.getId();
   }
 }

@@ -189,6 +189,8 @@
 								<schemaMapping>CourseLevel=com.teletubbies.course.course.CourseLevelType</schemaMapping>
 								<schemaMapping>CourseCategory=com.teletubbies.course.course.CourseCategoryType</schemaMapping>
 								<schemaMapping>InstructorRole=com.teletubbies.course.instructor.InstructorRoleType</schemaMapping>
+								<schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping>
+								<schemaMapping>FieldViolation=com.teletubbies.course.exception.FieldViolation</schemaMapping>
 							</schemaMappings>
 							<configOptions>
 								<delegatePattern>false</delegatePattern>
@@ -201,6 +203,15 @@
 					</execution>
 				</executions>
 			</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>3.6.0</version>
+						<configuration>
+							<!-- Fixes Mockito self-attaching warning by explicitly passing the byte-buddy Java agent, required in newer JDKs. -->
+							<argLine>-javaagent:"${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.18.11/byte-buddy-agent-1.18.11.jar"</argLine>
+						</configuration>
+					</plugin>
 		</plugins>
 	</build>
 

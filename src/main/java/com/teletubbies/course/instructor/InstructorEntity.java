@@ -16,11 +16,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.UUID;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+
+import lombok.*;
 
 @Entity
 @Table(
@@ -37,6 +34,7 @@ public class InstructorEntity implements Serializable {
   @Serial private static final long serialVersionUID = 1L;
 
   @Id
+  @Setter // Used for test
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(nullable = false, unique = true)
   private UUID id;

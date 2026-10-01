@@ -45,6 +45,14 @@ paths:
           $ref: 'responses.yaml#/components/responses/CourseResponse'
         400:
           $ref: 'responses.yaml#/components/responses/BadRequest'
+        401:
+          $ref: 'responses.yaml#/components/responses/Unauthorized'
+        403:
+          $ref: 'responses.yaml#/components/responses/Forbidden'
+        404:
+          $ref: 'responses.yaml#/components/responses/NotFound'
+        405:
+          $ref: 'responses.yaml#/components/responses/MethodNotAllowed'
         409:
           $ref: 'responses.yaml#/components/responses/Conflict'
         500:
@@ -60,6 +68,12 @@ paths:
       responses:
         200:
           $ref: 'responses.yaml#/components/responses/CoursesResponse'
+        401:
+          $ref: 'responses.yaml#/components/responses/Unauthorized'
+        403:
+          $ref: 'responses.yaml#/components/responses/Forbidden'
+        405:
+          $ref: 'responses.yaml#/components/responses/MethodNotAllowed'
         500:
           $ref: 'responses.yaml#/components/responses/InternalServerError'
 
@@ -85,8 +99,14 @@ paths:
           $ref: 'responses.yaml#/components/responses/CourseResponse'
         400:
           $ref: 'responses.yaml#/components/responses/BadRequest'
+        401:
+          $ref: 'responses.yaml#/components/responses/Unauthorized'
+        403:
+          $ref: 'responses.yaml#/components/responses/Forbidden'
         404:
           $ref: 'responses.yaml#/components/responses/NotFound'
+        405:
+          $ref: 'responses.yaml#/components/responses/MethodNotAllowed'
         409:
           $ref: 'responses.yaml#/components/responses/Conflict'
         500:
@@ -104,8 +124,14 @@ paths:
       responses:
         204:
           $ref: 'responses.yaml#/components/responses/Successful'
+        401:
+          $ref: 'responses.yaml#/components/responses/Unauthorized'
+        403:
+          $ref: 'responses.yaml#/components/responses/Forbidden'
         404:
           $ref: 'responses.yaml#/components/responses/NotFound'
+        405:
+          $ref: 'responses.yaml#/components/responses/MethodNotAllowed'
         500:
           $ref: 'responses.yaml#/components/responses/InternalServerError'
     get:
@@ -120,8 +146,14 @@ paths:
       responses:
         200:
           $ref: 'responses.yaml#/components/responses/CourseResponse'
+        401:
+          $ref: 'responses.yaml#/components/responses/Unauthorized'
+        403:
+          $ref: 'responses.yaml#/components/responses/Forbidden'
         404:
           $ref: 'responses.yaml#/components/responses/NotFound'
+        405:
+          $ref: 'responses.yaml#/components/responses/MethodNotAllowed'
         500:
           $ref: 'responses.yaml#/components/responses/InternalServerError'
 
@@ -145,6 +177,12 @@ paths:
           $ref: 'responses.yaml#/components/responses/InstructorResponse'
         400:
           $ref: 'responses.yaml#/components/responses/BadRequest'
+        401:
+          $ref: 'responses.yaml#/components/responses/Unauthorized'
+        403:
+          $ref: 'responses.yaml#/components/responses/Forbidden'
+        405:
+          $ref: 'responses.yaml#/components/responses/MethodNotAllowed'
         409:
           $ref: 'responses.yaml#/components/responses/Conflict'
         500:
@@ -160,6 +198,12 @@ paths:
       responses:
         200:
           $ref: 'responses.yaml#/components/responses/InstructorsResponse'
+        401:
+          $ref: 'responses.yaml#/components/responses/Unauthorized'
+        403:
+          $ref: 'responses.yaml#/components/responses/Forbidden'
+        405:
+          $ref: 'responses.yaml#/components/responses/MethodNotAllowed'
         500:
           $ref: 'responses.yaml#/components/responses/InternalServerError'
 
@@ -176,8 +220,14 @@ paths:
       responses:
         200:
           $ref: 'responses.yaml#/components/responses/InstructorResponse'
+        401:
+          $ref: 'responses.yaml#/components/responses/Unauthorized'
+        403:
+          $ref: 'responses.yaml#/components/responses/Forbidden'
         404:
           $ref: 'responses.yaml#/components/responses/NotFound'
+        405:
+          $ref: 'responses.yaml#/components/responses/MethodNotAllowed'
         500:
           $ref: 'responses.yaml#/components/responses/InternalServerError'
 
@@ -203,8 +253,14 @@ paths:
           $ref: 'responses.yaml#/components/responses/InstructorResponse'
         400:
           $ref: 'responses.yaml#/components/responses/BadRequest'
+        401:
+          $ref: 'responses.yaml#/components/responses/Unauthorized'
+        403:
+          $ref: 'responses.yaml#/components/responses/Forbidden'
         404:
           $ref: 'responses.yaml#/components/responses/NotFound'
+        405:
+          $ref: 'responses.yaml#/components/responses/MethodNotAllowed'
         409:
           $ref: 'responses.yaml#/components/responses/Conflict'
         500:
@@ -223,8 +279,14 @@ paths:
       responses:
         204:
           $ref: 'responses.yaml#/components/responses/Successful'
+        401:
+          $ref: 'responses.yaml#/components/responses/Unauthorized'
+        403:
+          $ref: 'responses.yaml#/components/responses/Forbidden'
         404:
           $ref: 'responses.yaml#/components/responses/NotFound'
+        405:
+          $ref: 'responses.yaml#/components/responses/MethodNotAllowed'
         409:
           $ref: 'responses.yaml#/components/responses/Conflict'
         500:

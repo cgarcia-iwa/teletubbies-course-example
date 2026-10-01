@@ -42,8 +42,8 @@ public class CourseService {
     if (courseRepository.existsByName(request.getName())) {
       throw conflict("Course name already exists: " + request.getName());
     }
-    validateInstructorExists(request.getInstructorId());
-    return toResource(courseRepository.save(new CourseEntity(request)));
+    final InstructorEntity instructor = findInstructorOrThrow(request.getInstructorId());
+    return toResource(courseRepository.save(new CourseEntity(request, instructor)));
   }
 
   @Transactional
@@ -52,8 +52,7 @@ public class CourseService {
     if (courseRepository.existsByNameAndIdNot(request.getName(), course.getId())) {
       throw conflict("Course name already exists: " + request.getName());
     }
-    validateInstructorExists(request.getInstructorId());
-    course.update(request);
+    course.update(request, findInstructorOrThrow(request.getInstructorId()));
     return toResource(courseRepository.save(course));
   }
 
@@ -62,16 +61,25 @@ public class CourseService {
     courseRepository.delete(findByIdOrThrow(courseId));
   }
 
-  private void validateInstructorExists(final String instructorId) {
+  /**
+   * Resolves the instructor referenced by the request. The course carries it as an association
+   * because that is what feeds the response, so a reference that cannot be resolved is rejected
+   * instead of leaving the course without an instructor.
+   */
+  private InstructorEntity findInstructorOrThrow(final String instructorId) {
     final UUID id;
     try {
       id = UUID.fromString(instructorId);
     } catch (final IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid instructorId: " + instructorId);
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Invalid instructorId: " + instructorId);
     }
-    if (!instructorRepository.existsById(id)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Instructor not found: " + instructorId);
-    }
+    return instructorRepository
+        .findById(id)
+        .orElseThrow(
+            () ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Instructor not found: " + instructorId));
   }
 
   private CourseEntity findByIdOrThrow(final String courseId) {
@@ -109,6 +117,7 @@ public class CourseService {
         .id(instructor.getId().toString())
         .fullName(instructor.getFullName())
         .email(instructor.getEmail())
+        .role(instructor.getRole())
         .build();
   }
 }

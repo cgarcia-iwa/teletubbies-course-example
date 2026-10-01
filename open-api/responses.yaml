@@ -1,25 +1,135 @@
 openapi: 3.0.3
 components:
+  schemas:
+    ProblemDetail:
+      type: object
+      title: ProblemDetail
+      description: |
+        Error response following RFC 9457. The `traceId` is also written to the server logs (level
+        `warn`) so that a report from a client can be correlated with the logs.
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - instance
+        - traceId
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI that identifies the type of the error.
+          example: https://api.teletubbies.dev/problems/not-found
+        title:
+          type: string
+          description: Short, human readable summary of the error.
+          example: Not Found
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code of the response.
+          example: 404
+        detail:
+          type: string
+          description: Human readable explanation specific to this occurrence of the error.
+          example: 'Course not found: 8a1f2b3c'
+        instance:
+          type: string
+          format: uri
+          description: URI of the request that produced the error.
+          example: /courses/8a1f2b3c
+        traceId:
+          type: string
+          format: uuid
+          description: Unique identifier of the request, present in the server logs.
+          example: 6f0d2f0e-8f2a-4d1b-9b4e-5a3a9c1d7e42
+        errors:
+          type: array
+          description: |
+            Violations per field. Only present when the request failed validation, otherwise the
+            property is omitted.
+          items:
+            $ref: '#/components/schemas/FieldViolation'
+
+    FieldViolation:
+      type: object
+      title: FieldViolation
+      description: A field of the request that was rejected.
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+          description: Name of the rejected field.
+          example: name
+        message:
+          type: string
+          description: Reason the field was rejected.
+          example: must not be blank
+
   responses:
     InternalServerError:
       description: |
         The request failed to be processed for reasons outside of the control of the client making the
          original request.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
     BadRequest:
       description: |
         The server was unable to process the request due to an error attributed to the client. This can occur due to various reasons, such as:
         - Mandatory parameters are missing in the request
         - One or more parameters in the request are invalid
         - The format of the request is incorrect
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    Unauthorized:
+      description: |
+        The request requires authentication. The credentials are missing, expired or invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    Forbidden:
+      description: |
+        The request was authenticated but the credentials do not grant access to the resource.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
     NotFound:
       description: The requested record was not found on the server.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    MethodNotAllowed:
+      description: |
+        The endpoint exists but does not support the HTTP method used in the request.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
     Conflict:
       description: |
         The request could not be processed due to a conflict in the request. The requested resource
           is not in the expected state or the result of the request processing creates a conflict with
           the resource.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
     Successful:
       description: Successful server response
+      # The 204 has no body. The content is declared only so that the generator keeps
+      # `application/json` in the endpoint `produces`: if only `application/problem+json` (the one
+      # used by the errors) were left, a client sending `Accept: application/json` would get a 406.
+      content:
+        application/json: {}
 
     CourseResponse:
       description: Response containing a single course.
