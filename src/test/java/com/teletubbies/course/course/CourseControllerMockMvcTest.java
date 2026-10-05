@@ -41,10 +41,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -66,7 +70,28 @@ import org.springframework.web.server.ResponseStatusException;
  * (malformed JSON, unknown route, unsupported HTTP method, unexpected error).
  */
 @WebMvcTest(CourseController.class)
+@Import(CourseControllerMockMvcTest.MethodSecurityTestConfig.class)
+@ImportAutoConfiguration(AopAutoConfiguration.class)
 class CourseControllerMockMvcTest {
+
+  /**
+   * The real {@code SecurityConfig} (which carries {@code @EnableMethodSecurity}) is a plain
+   * {@code @Configuration}, so the {@code @WebMvcTest} component scan excludes it and
+   * {@code @PreAuthorize} would be silently ignored — role restrictions would never be enforced
+   * and authorization tests would pass vacuously. This enables method security only, evaluated
+   * against the {@code @WithMockUser} principal (no filter chain or {@code @EnableWebSecurity}
+   * needed for that).
+   *
+   * <p>{@code AopAutoConfiguration} is imported above because the slice does not include it:
+   * without it, method security would build a JDK proxy (the controller implements
+   * {@code CoursesApi}), Spring MVC would not see {@code @Controller} on the proxy class and
+   * every route would 404. Importing it keeps proxying identical to production
+   * ({@code spring.aop.proxy-target-class=true} → CGLIB).
+   */
+  @TestConfiguration
+  @EnableMethodSecurity
+  static class MethodSecurityTestConfig {}
+
 
   private static final String TYPE_BASE_URL = "https://api.teletubbies.dev/problems/";
   private static final String TRACE_ID_REGEX =
@@ -260,7 +285,7 @@ class CourseControllerMockMvcTest {
                               .content(objectMapper.writeValueAsString(request))
                               .contentType(MediaType.APPLICATION_JSON))
               .andExpect(status().isBadRequest())
-              .andExpect(expectValidationProblemDetail(HttpStatus.BAD_REQUEST, "bad-request", COURSES_URL))
+              .andExpect(expectBadRequestValidationProblemDetail())
               .andExpect(jsonPath("$.errors.length()").value(4))
               .andExpect(
                       jsonPath(
@@ -291,7 +316,7 @@ class CourseControllerMockMvcTest {
                               .content(objectMapper.writeValueAsString(request))
                               .contentType(MediaType.APPLICATION_JSON))
               .andExpect(status().isBadRequest())
-              .andExpect(expectValidationProblemDetail(HttpStatus.BAD_REQUEST, "bad-request", COURSES_URL))
+              .andExpect(expectBadRequestValidationProblemDetail())
               .andExpect(jsonPath("$.errors.length()").value(1))
               .andExpect(jsonPath("$.errors[0].field").value("name"))
               .andExpect(jsonPath("$.errors[0].message").value("size must be between 1 and 100"));
@@ -451,18 +476,18 @@ class CourseControllerMockMvcTest {
 
     @SneakyThrows
     @Test
-    @WithMockUser(roles = "TEACHER")
-    @DisplayName("returns 403 when the user is not allowed to access the course")
-    void getCourse_should_return_403_when_access_is_denied() {
+    @WithMockUser(roles = "STUDENT") // authenticated, but neither ADMINISTRATOR nor TEACHER
+    @DisplayName("returns 403 when the user has none of the roles allowed by @PreAuthorize")
+    void getCourse_should_return_403_when_user_has_no_allowed_role() {
       String courseId = generateRandomId();
-
-      when(courseService.getById(courseId))
-              .thenThrow(new AccessDeniedException("Not the owner of the course"));
 
       mockMvc
               .perform(get(COURSE_URL, courseId))
               .andExpect(status().isForbidden())
               .andExpect(expectProblemDetail(HttpStatus.FORBIDDEN, "forbidden", "/courses/" + courseId));
+
+      // Authorization must reject the request before the controller (and the service) runs.
+      verify(courseService, never()).getById(courseId);
     }
   }
 
@@ -662,11 +687,9 @@ class CourseControllerMockMvcTest {
     };
   }
 
-  /** Same as {@link #expectProblemDetail} but also requires the list of per-field violations. */
-  private ResultMatcher expectValidationProblemDetail(
-          final HttpStatus status, final String type, final String instance) {
+  private ResultMatcher expectBadRequestValidationProblemDetail() {
     return result -> {
-      final DocumentContext json = assertProblem(result, status, type, instance);
+      final DocumentContext json = assertProblem(result, HttpStatus.BAD_REQUEST, "bad-request", CourseControllerMockMvcTest.COURSES_URL);
       assertThat(json.<Object>read("errors")).as("errors must be present").isNotNull();
     };
   }
