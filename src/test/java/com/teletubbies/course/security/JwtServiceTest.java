@@ -3,6 +3,7 @@ package com.teletubbies.course.security;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.teletubbies.course.config.SecurityProperties;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +24,8 @@ class JwtServiceTest {
       User.withUsername("laalaa@teletubbies.test").password("irrelevant").roles("ADMINISTRATOR").build();
 
   private final JwtService jwtService =
-      new JwtService(new JwtProperties(SECRET, Duration.ofMinutes(5)));
+      new JwtService(
+          new SecurityProperties(null, new SecurityProperties.Jwt(SECRET, Duration.ofMinutes(5))));
 
   @Test
   void generateToken_should_embed_email_as_subject() {
@@ -39,7 +41,8 @@ class JwtServiceTest {
   void extractUsername_should_reject_expired_token() {
     // GIVEN
     final JwtService expiredJwtService =
-        new JwtService(new JwtProperties(SECRET, Duration.ofSeconds(-1)));
+        new JwtService(
+            new SecurityProperties(null, new SecurityProperties.Jwt(SECRET, Duration.ofSeconds(-1))));
     final String token = expiredJwtService.generateToken(INSTRUCTOR);
 
     // WHEN / THEN

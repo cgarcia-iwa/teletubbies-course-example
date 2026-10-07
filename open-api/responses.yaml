@@ -166,3 +166,34 @@ components:
         application/json:
           schema:
             $ref: './resources.yaml#/components/schemas/InstructorsPagedResources'
+
+    LoginResponse:
+      description: Response containing the JWT issued for the authenticated user.
+      content:
+        application/json:
+          schema:
+            type: object
+            title: LoginResponse
+            required:
+              - token
+              - tokenType
+              - expiresIn
+              - role
+            properties:
+              token:
+                type: string
+                description: Signed JWT to use as Bearer token.
+                example: eyJhbGciOiJIUzI1NiJ9...
+              tokenType:
+                type: string
+                description: Type of the token.
+                example: Bearer
+              expiresIn:
+                type: integer
+                format: int64
+                description: Seconds until the token expires.
+                example: 3600
+              role:
+                type: string
+                description: Role of the authenticated user.
+                example: TEACHER

@@ -2,8 +2,8 @@ package com.teletubbies.course.config;
 
 import com.teletubbies.course.exception.ProblemDetailAuthenticationEntryPoint;
 import com.teletubbies.course.security.JwtAuthenticationFilter;
-import com.teletubbies.course.security.JwtProperties;
 import com.teletubbies.course.security.JwtService;
+import java.util.List;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +21,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties(JwtProperties.class)
+@EnableConfigurationProperties(SecurityProperties.class)
 public class SecurityConfig {
 
   @Bean
@@ -33,9 +36,11 @@ public class SecurityConfig {
       final HttpSecurity http,
       final JwtService jwtService,
       final UserDetailsService userDetailsService,
-      final ProblemDetailAuthenticationEntryPoint authenticationEntryPoint)
+      final ProblemDetailAuthenticationEntryPoint authenticationEntryPoint,
+      final CorsConfigurationSource corsConfigurationSource)
       throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
+        .cors(cors -> cors.configurationSource(corsConfigurationSource))
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
@@ -52,6 +57,26 @@ public class SecurityConfig {
             UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
+  }
+
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource(final SecurityProperties securityProperties) {
+    final SecurityProperties.Cors corsProperties = securityProperties.cors();
+    final CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of(corsProperties.allowOrigin().split(",")));
+    configuration.setAllowedMethods(
+        List.of(
+            HttpMethod.GET.name(),
+            HttpMethod.POST.name(),
+            HttpMethod.PUT.name(),
+            HttpMethod.DELETE.name(),
+            HttpMethod.OPTIONS.name()));
+    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setAllowCredentials(true);
+
+    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
   }
 
   @Bean

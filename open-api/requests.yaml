@@ -1,6 +1,32 @@
 openapi: 3.0.3
 components:
   schemas:
+    LoginRequest:
+      type: object
+      description: |
+        Payload used to authenticate a user.
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address of the user.
+          example: laalaa@teletubbies.test
+          minLength: 1
+          maxLength: 150
+          x-field-extra-annotation: "@NotBlank"
+        password:
+          type: string
+          format: password
+          writeOnly: true
+          description: Password of the user.
+          example: s3cret-pass
+          minLength: 8,
+          maxLength: 20
+          x-field-extra-annotation: "@NotBlank"
+
     NewCourseRequest:
       type: object
       description: |

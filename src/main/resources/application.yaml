@@ -22,12 +22,15 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
 
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION:1h}
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:1h}
+  cors:
+    allow-origin: ${ALLOW_ORIGIN}
 
 app:
   admin:
     full-name: ${ADMIN_FULL_NAME:Administrator}
-    email: ${ADMIN_EMAIL:}
-    password: ${ADMIN_PASSWORD:}
+    email: ${ADMIN_EMAIL}
+    password: ${ADMIN_PASSWORD}

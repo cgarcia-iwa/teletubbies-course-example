@@ -1,5 +1,6 @@
 package com.teletubbies.course.security;
 
+import com.teletubbies.course.config.SecurityProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -18,10 +19,10 @@ public class JwtService {
   private static final String ROLE_PREFIX = "ROLE_";
 
   private final SecretKey signingKey;
-  private final JwtProperties properties;
+  private final SecurityProperties.Jwt properties;
 
-  public JwtService(final JwtProperties properties) {
-    this.properties = properties;
+  public JwtService(final SecurityProperties securityProperties) {
+    this.properties = securityProperties.jwt();
     // Throws WeakKeyException at startup if the secret is shorter than 256 bits.
     this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(properties.secret()));
   }

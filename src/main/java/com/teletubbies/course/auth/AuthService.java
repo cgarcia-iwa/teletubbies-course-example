@@ -1,5 +1,7 @@
 package com.teletubbies.course.auth;
 
+import com.teletubbies.course.model.LoginRequest;
+import com.teletubbies.course.model.LoginResponse;
 import com.teletubbies.course.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,7 +28,7 @@ public class AuthService {
       authentication =
           authenticationManager.authenticate(
               UsernamePasswordAuthenticationToken.unauthenticated(
-                  request.email(), request.password()));
+                  request.getEmail(), request.getPassword()));
     } catch (final AuthenticationException e) {
       // Same message for "unknown email" and "wrong password" so we do not reveal which emails exist.
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
@@ -34,7 +36,11 @@ public class AuthService {
 
     final UserDetails user = (UserDetails) authentication.getPrincipal();
     final String token = jwtService.generateToken(user);
-    return new LoginResponse(
-        token, TOKEN_TYPE, jwtService.getExpirationSeconds(), jwtService.extractRole(token));
+    return LoginResponse.builder()
+        .token(token)
+        .tokenType(TOKEN_TYPE)
+        .expiresIn(jwtService.getExpirationSeconds())
+        .role(jwtService.extractRole(token))
+        .build();
   }
 }

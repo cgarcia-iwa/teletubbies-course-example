@@ -22,10 +22,37 @@ servers:
         default: localhost
 
 tags:
+  - name: auth
   - name: courses
   - name: instructors
 
 paths:
+  '/auth/login':
+    post:
+      tags:
+        - auth
+      summary: Log in
+      description: |
+        This endpoint authenticates a user by email and password and returns a JWT.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'requests.yaml#/components/schemas/LoginRequest'
+      responses:
+        200:
+          $ref: 'responses.yaml#/components/responses/LoginResponse'
+        400:
+          $ref: 'responses.yaml#/components/responses/BadRequest'
+        401:
+          $ref: 'responses.yaml#/components/responses/Unauthorized'
+        405:
+          $ref: 'responses.yaml#/components/responses/MethodNotAllowed'
+        500:
+          $ref: 'responses.yaml#/components/responses/InternalServerError'
+
   '/courses':
     post:
       tags:
