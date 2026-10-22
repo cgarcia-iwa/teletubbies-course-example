@@ -1,0 +1,41 @@
+name: ✅ Pull Request
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  validate:
+    name: 🔖 OpenAPI + tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # --- OpenAPI ---
+      - name: Setup node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 20
+      - name: Install swagger-cli
+        run: npm install -g swagger-cli
+      - name: Generate OpenAPI bundle
+        run: swagger-cli bundle ./open-api/openapi.yaml --outfile ./generated/openapi-bundle.yaml --type yaml
+      - name: Validate openAPI
+        run: swagger-cli validate ./generated/openapi-bundle.yaml
+
+      # --- Tests ---
+      - name: Set up JDK 25
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          java-version: 25
+          distribution: temurin
+          cache: maven
+      - name: Run tests
+        run: make test
