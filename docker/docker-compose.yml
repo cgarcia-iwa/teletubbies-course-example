@@ -21,3 +21,29 @@ services:
         source: ./postgres/init.sh
         target: /docker-entrypoint-initdb.d/1-init.sh
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+
+  api:
+    depends_on:
+      - db_postgres
+    build:
+      context: ..
+      # Por defecto busca el "Dockerfile" en la raíz del context.
+      # También se puede especificar otra ruta (relativa al context):
+      # dockerfile: docker/Dockerfile
+    environment:
+      DB_HOST: db_postgres
+      DB_PORT: 5432
+      DB_SCHEMA: ${DB_SCHEMA}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      MIGRATION_POSTGRES_USER: ${MIGRATION_POSTGRES_USER}
+      MIGRATION_POSTGRES_PASSWORD: ${MIGRATION_POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      ADMIN_FULL_NAME: ${ADMIN_FULL_NAME}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ALLOW_ORIGIN: ${ALLOW_ORIGIN}
+    restart: always
+    ports:
+      - "8080:8080"

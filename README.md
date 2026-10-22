@@ -31,11 +31,12 @@ The local database runs in Docker Compose (see `docker/docker-compose.yml`).
    ```bash
    cp .env-template local.env
    ```
-2. Start the container:
+2. Package the app (Maven), then start the containers (DB + API):
    ```bash
-   make docker-build
+   make build
+   make docker-up
    ```
-   To recreate the container after changing config:
+   To recreate the containers after changing config or code (run `make build` first if the code changed):
    ```bash
    make docker-update
    ```
