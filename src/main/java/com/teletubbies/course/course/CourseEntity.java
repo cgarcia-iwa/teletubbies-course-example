@@ -16,8 +16,12 @@ import jakarta.persistence.UniqueConstraint;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
-
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(
@@ -62,21 +66,38 @@ public class CourseEntity implements Serializable {
   private InstructorEntity instructor;
 
   public CourseEntity(final NewCourseRequest request, final InstructorEntity instructor) {
-    this.name = request.getName();
-    this.description = request.getDescription();
-    this.duration = request.getDuration().shortValue();
-    this.level = request.getLevel();
-    this.category = request.getCategory();
-    this.instructor = instructor;
-    this.instructorId = instructor.getId();
+    apply(
+        request.getName(),
+        request.getDescription(),
+        request.getDuration(),
+        request.getLevel(),
+        request.getCategory(),
+        instructor);
   }
 
   public void update(final UpdateCourseRequest request, final InstructorEntity instructor) {
-    this.name = request.getName();
-    this.description = request.getDescription();
-    this.duration = request.getDuration().shortValue();
-    this.level = request.getLevel();
-    this.category = request.getCategory();
+    apply(
+        request.getName(),
+        request.getDescription(),
+        request.getDuration(),
+        request.getLevel(),
+        request.getCategory(),
+        instructor);
+  }
+
+  // The association is the source of truth: instructorId is always derived from it here.
+  private void apply(
+      final String name,
+      final String description,
+      final Integer duration,
+      final CourseLevelType level,
+      final CourseCategoryType category,
+      final InstructorEntity instructor) {
+    this.name = name;
+    this.description = description;
+    this.duration = duration.shortValue();
+    this.level = level;
+    this.category = category;
     this.instructor = instructor;
     this.instructorId = instructor.getId();
   }

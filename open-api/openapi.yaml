@@ -106,6 +106,8 @@ paths:
       responses:
         200:
           $ref: 'responses.yaml#/components/responses/CoursesPageResponse'
+        400:
+          $ref: 'responses.yaml#/components/responses/BadRequest'
         401:
           $ref: 'responses.yaml#/components/responses/Unauthorized'
         403:

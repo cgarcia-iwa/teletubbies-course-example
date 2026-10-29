@@ -104,6 +104,44 @@ class CourseRepositoryTest extends BaseRepositoryTest {
     assertThat(result).as(testCase).isEqualTo(expectedResult);
   }
 
+  static Stream<Arguments> existsByIdAndInstructor_Email_data_provider() {
+    return Stream.of(
+        Arguments.of(
+            "Course owned by the instructor",
+            UUID.fromString("00000000-0000-0000-0000-000000000101"),
+            "laalaa@teletubbies.test",
+            true),
+        Arguments.of(
+            "Course owned by another instructor",
+            UUID.fromString("00000000-0000-0000-0000-000000000103"),
+            "laalaa@teletubbies.test",
+            false),
+        Arguments.of(
+            "Non-existing course id",
+            UUID.fromString("00000000-0000-0000-0000-000000000999"),
+            "laalaa@teletubbies.test",
+            false),
+        Arguments.of(
+            "Unknown email",
+            UUID.fromString("00000000-0000-0000-0000-000000000101"),
+            "nobody@teletubbies.test",
+            false));
+  }
+
+  @DatabaseSetup(DBUNIT_XML)
+  @ParameterizedTest
+  @MethodSource("existsByIdAndInstructor_Email_data_provider")
+  void existsByIdAndInstructor_Email_should_return_expected_results(
+      final String testCase, final UUID courseId, final String email, final boolean expectedResult) {
+    // GIVEN existsByIdAndInstructor_Email_data_provider
+
+    // WHEN
+    final boolean result = courseRepository.existsByIdAndInstructor_Email(courseId, email);
+
+    // THEN
+    assertThat(result).as(testCase).isEqualTo(expectedResult);
+  }
+
   @DatabaseSetup(DBUNIT_XML)
   @Test
   void existsByNameAndIdNot_should_ignore_the_course_itself() {

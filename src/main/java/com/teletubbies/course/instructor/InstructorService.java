@@ -33,7 +33,7 @@ public class InstructorService {
     final Pageable safePageable = pageable != null ? pageable : Pageable.unpaged();
     return instructorRepository
         .findAll(InstructorSpecification.findAllWithFilters(fullName, email, role), safePageable)
-        .map(this::toResource);
+        .map(InstructorService::toResource);
   }
 
   @Transactional(readOnly = true)
@@ -99,7 +99,8 @@ public class InstructorService {
     return new ResponseStatusException(HttpStatus.CONFLICT, message);
   }
 
-  private InstructorResource toResource(final InstructorEntity instructor) {
+  /** Single mapper for instructors, also used to embed the instructor in course responses. */
+  public static InstructorResource toResource(final InstructorEntity instructor) {
     return InstructorResource.builder()
         .id(instructor.getId().toString())
         .fullName(instructor.getFullName())

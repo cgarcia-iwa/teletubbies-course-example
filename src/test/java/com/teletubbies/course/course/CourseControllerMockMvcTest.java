@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -36,6 +37,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,6 +51,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -106,6 +109,11 @@ class CourseControllerMockMvcTest {
 
   @MockitoBean // The service is mocked to keep the test focused on the web layer.
   private CourseService courseService;
+
+  // Mocked under the bean name the SpEL references (@courseSecurity.isOwner), so the owner branch
+  // of updateCourse is evaluated; its own logic is covered by CourseSecurityTest.
+  @MockitoBean(name = "courseSecurity")
+  private CourseSecurity courseSecurity;
 
   // ---------------------------------------------------------------------------------------------
   // Helpers for building test data (avoid repeating the same .builder()...build() blocks in
@@ -338,6 +346,25 @@ class CourseControllerMockMvcTest {
               .andExpect(status().isBadRequest())
               .andExpect(expectProblemDetail(HttpStatus.BAD_REQUEST, "bad-request", COURSES_URL));
     }
+
+    @SneakyThrows
+    @Test
+    @WithMockUser(roles = "TEACHER")
+    @DisplayName("returns 403 when a TEACHER tries to create a course")
+    void createCourse_should_return_403_when_user_is_teacher() {
+      NewCourseRequest request = buildNewCourseRequestBuilder(generateRandomId()).build();
+
+      mockMvc
+              .perform(
+                      post(COURSES_URL)
+                              .with(csrf())
+                              .content(objectMapper.writeValueAsString(request))
+                              .contentType(MediaType.APPLICATION_JSON))
+              .andExpect(status().isForbidden())
+              .andExpect(expectProblemDetail(HttpStatus.FORBIDDEN, "forbidden", COURSES_URL));
+
+      verify(courseService, never()).create(any(NewCourseRequest.class));
+    }
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -417,6 +444,22 @@ class CourseControllerMockMvcTest {
 
       verify(courseService)
               .getAll(eq("Spring"), eq(CourseLevelType.BEGINNER), eq(CourseCategoryType.PROGRAMMING), eq(instructorId), any());
+    }
+
+    @SneakyThrows
+    @Test
+    @WithMockUser(roles = "TEACHER")
+    @DisplayName("returns 400 when the instructorId filter is not a valid UUID")
+    void getAllCourses_should_return_400_when_instructor_id_filter_is_invalid() {
+      when(courseService.getAll(isNull(), isNull(), isNull(), eq("not-a-uuid"), any(Pageable.class)))
+              .thenThrow(
+                      new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid instructorId: not-a-uuid"));
+
+      mockMvc
+              .perform(get(COURSES_URL).queryParam("instructorId", "not-a-uuid"))
+              .andExpect(status().isBadRequest())
+              .andExpect(expectProblemDetail(HttpStatus.BAD_REQUEST, "bad-request", COURSES_URL))
+              .andExpect(jsonPath("$.detail").value("Invalid instructorId: not-a-uuid"));
     }
   }
 
@@ -586,6 +629,82 @@ class CourseControllerMockMvcTest {
               .andExpect(expectProblemDetail(HttpStatus.NOT_FOUND, "not-found", "/courses/" + courseId))
               .andExpect(jsonPath("$.detail").value("Instructor not found: " + instructorId));
     }
+
+    @SneakyThrows
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    @DisplayName("an ADMINISTRATOR is allowed without running the ownership check")
+    void updateCourse_should_not_check_ownership_when_user_is_administrator() {
+      String courseId = generateRandomId();
+      UpdateCourseRequest request = buildUpdateCourseRequestBuilder(generateRandomId()).build();
+
+      mockMvc
+              .perform(
+                      put(COURSE_URL, courseId)
+                              .with(csrf())
+                              .content(objectMapper.writeValueAsString(request))
+                              .contentType(MediaType.APPLICATION_JSON))
+              .andExpect(status().isOk());
+
+      verifyNoInteractions(courseSecurity);
+      verify(courseService).update(eq(courseId), any(UpdateCourseRequest.class));
+    }
+
+    @SneakyThrows
+    @Test
+    @WithMockUser(username = "owner@teletubbies.test", roles = "TEACHER")
+    @DisplayName("the TEACHER who owns the course can update it")
+    void updateCourse_should_return_200_when_teacher_owns_the_course() {
+      String courseId = generateRandomId();
+      String instructorId = generateRandomId();
+      UpdateCourseRequest request = buildUpdateCourseRequestBuilder(instructorId).build();
+
+      when(courseSecurity.isOwner(eq(courseId), any(Authentication.class))).thenReturn(true);
+      when(courseService.update(eq(courseId), any(UpdateCourseRequest.class)))
+              .thenReturn(
+                      buildCourse(
+                              courseId,
+                              request.getName(),
+                              request.getDescription(),
+                              request.getCategory(),
+                              request.getDuration(),
+                              request.getLevel(),
+                              buildTestInstructor(instructorId)));
+
+      mockMvc
+              .perform(
+                      put(COURSE_URL, courseId)
+                              .with(csrf())
+                              .content(objectMapper.writeValueAsString(request))
+                              .contentType(MediaType.APPLICATION_JSON))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.course.id").value(courseId));
+
+      verify(courseSecurity).isOwner(eq(courseId), any(Authentication.class));
+      verify(courseService).update(eq(courseId), any(UpdateCourseRequest.class));
+    }
+
+    @SneakyThrows
+    @Test
+    @WithMockUser(username = "other@teletubbies.test", roles = "TEACHER")
+    @DisplayName("returns 403 when a TEACHER updates a course they do not own")
+    void updateCourse_should_return_403_when_teacher_does_not_own_the_course() {
+      String courseId = generateRandomId();
+      UpdateCourseRequest request = buildUpdateCourseRequestBuilder(generateRandomId()).build();
+
+      when(courseSecurity.isOwner(eq(courseId), any(Authentication.class))).thenReturn(false);
+
+      mockMvc
+              .perform(
+                      put(COURSE_URL, courseId)
+                              .with(csrf())
+                              .content(objectMapper.writeValueAsString(request))
+                              .contentType(MediaType.APPLICATION_JSON))
+              .andExpect(status().isForbidden())
+              .andExpect(expectProblemDetail(HttpStatus.FORBIDDEN, "forbidden", "/courses/" + courseId));
+
+      verify(courseService, never()).update(eq(courseId), any(UpdateCourseRequest.class));
+    }
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -632,6 +751,21 @@ class CourseControllerMockMvcTest {
               // The "detail" exposed to the client is generic: the real cause only reaches the
               // server logs, it must never reach the response body.
               .andExpect(content().string(not(containsString("Connection to the database was lost"))));
+    }
+
+    @SneakyThrows
+    @Test
+    @WithMockUser(roles = "TEACHER")
+    @DisplayName("returns 403 when a TEACHER tries to delete a course")
+    void deleteCourse_should_return_403_when_user_is_teacher() {
+      String courseId = generateRandomId();
+
+      mockMvc
+              .perform(delete(COURSE_URL, courseId).with(csrf()))
+              .andExpect(status().isForbidden())
+              .andExpect(expectProblemDetail(HttpStatus.FORBIDDEN, "forbidden", "/courses/" + courseId));
+
+      verify(courseService, never()).delete(courseId);
     }
   }
 

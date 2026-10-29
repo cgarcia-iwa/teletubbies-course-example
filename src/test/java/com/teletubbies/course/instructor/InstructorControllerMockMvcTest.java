@@ -59,7 +59,9 @@ import org.springframework.web.server.ResponseStatusException;
  *
  * <p>The service is mocked to isolate the web layer: these tests cover routing, JSON envelopes,
  * Bean Validation and the translation of exceptions into RFC 9457 problem details. Method security
- * is NOT active in this slice (see {@code InstructorControllerSecurityMockMvcTest}).
+ * is NOT active in this slice, so the {@code @WithMockUser} annotations here do not exercise
+ * {@code @PreAuthorize}; see {@link com.teletubbies.course.course.CourseControllerMockMvcTest} for
+ * the setup that turns it on.
  */
 @WebMvcTest(InstructorController.class)
 class InstructorControllerMockMvcTest {
