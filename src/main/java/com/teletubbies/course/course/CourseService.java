@@ -6,6 +6,7 @@ import com.teletubbies.course.instructor.InstructorService;
 import com.teletubbies.course.model.CourseResource;
 import com.teletubbies.course.model.NewCourseRequest;
 import com.teletubbies.course.model.UpdateCourseRequest;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
@@ -98,10 +99,15 @@ public class CourseService {
   // The caller decides the status: a malformed path id is a 404, a malformed reference a 400.
   private static UUID parseUuid(
       final String value, final Supplier<ResponseStatusException> onInvalid) {
+    return tryParseUuid(value).orElseThrow(onInvalid);
+  }
+
+  // Shared with CourseSecurity.isOwner, which needs the non-throwing form (invalid id -> false).
+  static Optional<UUID> tryParseUuid(final String value) {
     try {
-      return UUID.fromString(value);
+      return Optional.of(UUID.fromString(value));
     } catch (final IllegalArgumentException e) {
-      throw onInvalid.get();
+      return Optional.empty();
     }
   }
 

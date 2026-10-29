@@ -5,8 +5,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @Component("courseSecurity")
 @RequiredArgsConstructor
 public class CourseSecurity {
@@ -20,12 +18,8 @@ public class CourseSecurity {
      */
     @Transactional(readOnly = true)
     public boolean isOwner(final String courseId, final Authentication authentication) {
-        final UUID id;
-        try {
-            id = UUID.fromString(courseId);
-        } catch (final IllegalArgumentException e) {
-            return false;
-        }
-        return courseRepository.existsByIdAndInstructor_Email(id, authentication.getName());
+        return CourseService.tryParseUuid(courseId)
+                .map(id -> courseRepository.existsByIdAndInstructor_Email(id, authentication.getName()))
+                .orElse(false);
     }
 }

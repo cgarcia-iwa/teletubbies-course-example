@@ -37,6 +37,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -450,7 +451,7 @@ class CourseControllerMockMvcTest {
     @WithMockUser(roles = "TEACHER")
     @DisplayName("returns 400 when the instructorId filter is not a valid UUID")
     void getAllCourses_should_return_400_when_instructor_id_filter_is_invalid() {
-      when(courseService.getAll(isNull(), isNull(), isNull(), eq("not-a-uuid"), any()))
+      when(courseService.getAll(isNull(), isNull(), isNull(), eq("not-a-uuid"), any(Pageable.class)))
               .thenThrow(
                       new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid instructorId: not-a-uuid"));
 
