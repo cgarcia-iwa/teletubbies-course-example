@@ -2,11 +2,12 @@ package com.teletubbies.course.course;
 
 import com.teletubbies.course.instructor.InstructorEntity;
 import com.teletubbies.course.instructor.InstructorRepository;
+import com.teletubbies.course.instructor.InstructorService;
 import com.teletubbies.course.model.CourseResource;
-import com.teletubbies.course.model.InstructorResource;
 import com.teletubbies.course.model.NewCourseRequest;
 import com.teletubbies.course.model.UpdateCourseRequest;
 import java.util.UUID;
+import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,22 +37,13 @@ public class CourseService {
       final String instructorId,
       final Pageable pageable) {
     final UUID instructorFilterId =
-        instructorId != null ? parseInstructorFilterId(instructorId) : null;
+        instructorId != null ? parseUuid(instructorId, () -> invalidInstructorId(instructorId)) : null;
     final Pageable safePageable = pageable != null ? pageable : Pageable.unpaged();
     return courseRepository
         .findAll(
             CourseSpecification.findAllWithFilters(name, level, category, instructorFilterId),
             safePageable)
         .map(this::toResource);
-  }
-
-  private UUID parseInstructorFilterId(final String instructorId) {
-    try {
-      return UUID.fromString(instructorId);
-    } catch (final IllegalArgumentException e) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Invalid instructorId: " + instructorId);
-    }
   }
 
   @Transactional(readOnly = true)
@@ -89,13 +81,7 @@ public class CourseService {
    * instead of leaving the course without an instructor.
    */
   private InstructorEntity findInstructorOrThrow(final String instructorId) {
-    final UUID id;
-    try {
-      id = UUID.fromString(instructorId);
-    } catch (final IllegalArgumentException e) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Invalid instructorId: " + instructorId);
-    }
+    final UUID id = parseUuid(instructorId, () -> invalidInstructorId(instructorId));
     return instructorRepository
         .findById(id)
         .orElseThrow(
@@ -105,13 +91,23 @@ public class CourseService {
   }
 
   private CourseEntity findByIdOrThrow(final String courseId) {
-    final UUID id;
-    try {
-      id = UUID.fromString(courseId);
-    } catch (final IllegalArgumentException e) {
-      throw notFound(courseId);
-    }
+    final UUID id = parseUuid(courseId, () -> notFound(courseId));
     return courseRepository.findById(id).orElseThrow(() -> notFound(courseId));
+  }
+
+  // The caller decides the status: a malformed path id is a 404, a malformed reference a 400.
+  private static UUID parseUuid(
+      final String value, final Supplier<ResponseStatusException> onInvalid) {
+    try {
+      return UUID.fromString(value);
+    } catch (final IllegalArgumentException e) {
+      throw onInvalid.get();
+    }
+  }
+
+  private ResponseStatusException invalidInstructorId(final String instructorId) {
+    return new ResponseStatusException(
+        HttpStatus.BAD_REQUEST, "Invalid instructorId: " + instructorId);
   }
 
   private ResponseStatusException notFound(final String courseId) {
@@ -130,16 +126,7 @@ public class CourseService {
         .duration(course.getDuration().intValue())
         .level(course.getLevel())
         .category(course.getCategory())
-        .instructor(toResource(course.getInstructor()))
-        .build();
-  }
-
-  private InstructorResource toResource(final InstructorEntity instructor) {
-    return InstructorResource.builder()
-        .id(instructor.getId().toString())
-        .fullName(instructor.getFullName())
-        .email(instructor.getEmail())
-        .role(instructor.getRole())
+        .instructor(InstructorService.toResource(course.getInstructor()))
         .build();
   }
 }
